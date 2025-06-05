@@ -16,10 +16,14 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        format-sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
+application:
+  security:
+    jwt:
+      secret-key: 6bc4b66bb91521758a881387561d819f5bf6609597e51d4cc110944f01051695b4781a2381584d900315da8121d4f19cf8dbed662ab8ee4977a6c6b3bbd353e5
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
 
-app:
-  jwt-secret: 6bc4b66bb91521758a881387561d819f5bf6609597e51d4cc110944f01051695b4781a2381584d900315da8121d4f19cf8dbed662ab8ee4977a6c6b3bbd353e5
-#  jwt-secret: ${JWT_SECRET:default_secret_value}
-  jwt-expiration-milliseconds: 3600000
