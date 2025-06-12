@@ -41,58 +41,45 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
+                                .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
+//                                .requestMatchers("/api/user/**").permitAll()
 
 //                        .requestMatchers("/api/admin/**").hasRole(ADMIN.name()) // ✅ Chỉ Admin được truy cập
 //                        .requestMatchers(GET,"/api/admin/**").hasAuthority(ADMIN_READ.name())
 //                        .requestMatchers(POST,"/api/admin/**").hasAuthority(ADMIN_CREATE.name())
 //                        .requestMatchers(PUT,"/api/admin/**").hasAuthority(ADMIN_UPDATE.name())
 //                        .requestMatchers(DELETE,"/api/admin/**").hasAuthority(ADMIN_DELETE.name())
+//
+//                        .requestMatchers("/api/premium/**").hasRole(PREMIUM.name()) // ✅ Chỉ Premium User được truy cập
+//                        .requestMatchers(GET,"/api/premium/**").hasAuthority(PREMIUM_READ.name())
+//                        .requestMatchers(POST,"/api/premium/**").hasAuthority(PREMIUM_CREATE.name())
+//                        .requestMatchers(PUT,"/api/premium/**").hasAuthority(PREMIUM_UPDATE.name())
+//                        .requestMatchers(DELETE,"/api/premium/**").hasAuthority(PREMIUM_DELETE.name())
+//
+//                        .requestMatchers("/api/user/**").hasAnyRole(FREE.name(), PREMIUM.name()) // ✅ Người dùng thông thường & Premium đều được phép
+//                        .requestMatchers(GET,"/api/user/**").hasAnyAuthority(FREE_READ.name(),PREMIUM_READ.name())
+//                        .requestMatchers(POST,"/api/user/**").hasAnyAuthority(FREE_CREATE.name(), PREMIUM_CREATE.name())
+//                        .requestMatchers(PUT,"/api/user/**").hasAnyAuthority(FREE_UPDATE.name(), PREMIUM_UPDATE.name())
+//                        .requestMatchers(DELETE,"/api/user/**").hasAnyAuthority(FREE_DELETE.name(), PREMIUM_DELETE.name())
 
-                        .requestMatchers("/api/premium/**").hasRole(PREMIUM.name()) // ✅ Chỉ Premium User được truy cập
-                        .requestMatchers(GET,"/api/premium/**").hasAuthority(PREMIUM_READ.name())
-                        .requestMatchers(POST,"/api/premium/**").hasAuthority(PREMIUM_CREATE.name())
-                        .requestMatchers(PUT,"/api/premium/**").hasAuthority(PREMIUM_UPDATE.name())
-                        .requestMatchers(DELETE,"/api/premium/**").hasAuthority(PREMIUM_DELETE.name())
+                                .anyRequest().authenticated()
 
-                        .requestMatchers("/api/user/**").hasAnyRole(FREE.name(), PREMIUM.name()) // ✅ Người dùng thông thường & Premium đều được phép
-                        .requestMatchers(GET,"/api/user/**").hasAnyAuthority(FREE_READ.name(),PREMIUM_READ.name())
-                        .requestMatchers(POST,"/api/user/**").hasAnyAuthority(FREE_CREATE.name(), PREMIUM_CREATE.name())
-                        .requestMatchers(PUT,"/api/user/**").hasAnyAuthority(FREE_UPDATE.name(), PREMIUM_UPDATE.name())
-                        .requestMatchers(DELETE,"/api/user/**").hasAnyAuthority(FREE_DELETE.name(), PREMIUM_DELETE.name())
-
-                        .anyRequest().authenticated()
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS) )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-            return http.build();
+        return http.build();
     }
 
-
-//
 //    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return username -> userRepo.findByEmail(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//    }
+//    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+//        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+//        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities"); // Xác nhận trường authorities
+//        grantedAuthoritiesConverter.setAuthorityPrefix(""); // Không thêm ROLE_ trước quyền hạn
 //
-//    @Bean
-//    public PasswordEncoder passwordEncoder(){
-//        return new BCryptPasswordEncoder();
-//    }
-//
-//    @Bean
-//    public AuthenticationProvider authenticationProvider(){
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.setUserDetailsService(userDetailsService);
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        return authProvider;
-//    }
-//
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
-//        return config.getAuthenticationManager();
+//        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+//        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+//        return jwtAuthenticationConverter;
 //    }
 }

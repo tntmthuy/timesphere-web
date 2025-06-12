@@ -17,7 +17,9 @@ public enum Role {
                     FREE_READ,
                     FREE_CREATE,
                     FREE_DELETE,
-                    FREE_UPDATE
+                    FREE_UPDATE,
+
+                    FREE_POST_COMMENT
             )
     ),
     PREMIUM(
@@ -38,7 +40,8 @@ public enum Role {
                     ADMIN_READ,
                     ADMIN_CREATE,
                     ADMIN_DELETE,
-                    ADMIN_UPDATE
+                    ADMIN_UPDATE,
+                    ADMIN_READ_ALL_USERS
             )
     );
 

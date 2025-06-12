@@ -6,6 +6,7 @@ import com.timesphere.timesphere.dto.RegisterRequest;
 import com.timesphere.timesphere.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +20,16 @@ public class AuthenticationController {
 
     private final AuthenticationService service;
 
+    //đăng ký
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request
     ) {
+        System.out.println("🔍 Đăng ký email: " + request.getEmail());
         return ResponseEntity.ok(service.register(request));
     }
+
+    //đăng nhập
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request

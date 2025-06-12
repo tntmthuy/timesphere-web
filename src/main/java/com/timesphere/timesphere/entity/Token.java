@@ -19,7 +19,7 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.UUID)
     public String id;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 512)
     public String token;
 
     @Enumerated(EnumType.STRING)

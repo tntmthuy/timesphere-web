@@ -9,6 +9,7 @@ public enum Permission {
     FREE_CREATE("user_free:create"),
     FREE_DELETE("user_free:delete"),
     FREE_UPDATE("user_free::update"),
+    FREE_POST_COMMENT("user_free:post_comment"),
 
     PREMIUM_READ("user_premium:read"),
     PREMIUM_CREATE("user_premium:create"),
