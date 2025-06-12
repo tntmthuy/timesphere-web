@@ -2,6 +2,7 @@ package com.timesphere.timesphere.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,13 +26,13 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 128, nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(length = 64, nullable = false)
     private String password;
 
-//    @Column(nullable = false, unique = true)
+    //    @Column(nullable = false, unique = true)
     private String username;
 
     private String firstname;
@@ -62,6 +63,9 @@ public class User implements UserDetails {
     @ManyToOne
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
+
+    @OneToMany(mappedBy = "cmt_by", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

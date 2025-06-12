@@ -1,6 +1,8 @@
 package com.timesphere.timesphere.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +23,12 @@ public class Comment {
     private Integer id;
 
     private String content;
-    private LocalDateTime cmt_create_at;
-    private String cmt_by;
 
+    private LocalDateTime cmt_create_at;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private User cmt_by;
+
+    private String cmt_to;
 }
