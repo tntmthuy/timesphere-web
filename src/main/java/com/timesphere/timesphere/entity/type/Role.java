@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.entity;
+package com.timesphere.timesphere.entity.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.timesphere.timesphere.entity.Permission.*;
+import static com.timesphere.timesphere.entity.type.Permission.*;
 
 @RequiredArgsConstructor
 public enum Role {
@@ -19,7 +19,8 @@ public enum Role {
                     FREE_DELETE,
                     FREE_UPDATE,
 
-                    FREE_POST_COMMENT
+                    FREE_POST_COMMENT,
+                    TEAM_WORKSPACE
             )
     ),
     PREMIUM(
@@ -32,7 +33,9 @@ public enum Role {
                     PREMIUM_READ,
                     PREMIUM_CREATE,
                     PREMIUM_DELETE,
-                    PREMIUM_UPDATE
+                    PREMIUM_UPDATE,
+
+                    TEAM_WORKSPACE
             )
     ),
     ADMIN(
@@ -41,7 +44,9 @@ public enum Role {
                     ADMIN_CREATE,
                     ADMIN_DELETE,
                     ADMIN_UPDATE,
-                    ADMIN_READ_ALL_USERS
+                    ADMIN_READ_ALL_USERS,
+
+                    TEAM_WORKSPACE
             )
     );
 

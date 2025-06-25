@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.dto;
+package com.timesphere.timesphere.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -1,39 +1,35 @@
 package com.timesphere.timesphere.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "team_workspace")
-public class TeamWorkspace {
+public class TeamWorkspace extends BaseEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-    private String team_name;
-    private LocalDateTime team_create_at;
+    @Column(name = "team_name")
+    private String teamName;
 
-    @ManyToMany
-    @JoinTable(
-            name = "teams_users",
-            joinColumns = {
-                    @JoinColumn(name = "team_id")
-            },
+    private String description;
 
-            inverseJoinColumns = {
-                    @JoinColumn(name = "user_id")
-            }
-    )
-    private List<User> users;
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<TeamMember> members;
+
+
 }

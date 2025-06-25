@@ -1,12 +1,15 @@
 package com.timesphere.timesphere.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.timesphere.timesphere.dto.AuthenticationRequest;
-import com.timesphere.timesphere.dto.AuthenticationResponse;
-import com.timesphere.timesphere.dto.RegisterRequest;
+import com.timesphere.timesphere.dto.request.AuthenticationRequest;
+import com.timesphere.timesphere.dto.response.AuthenticationResponse;
+import com.timesphere.timesphere.dto.request.RegisterRequest;
+import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.Token;
-import com.timesphere.timesphere.entity.TokenType;
+import com.timesphere.timesphere.entity.type.TokenType;
 import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.exception.AppException;
+import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.repository.TokenRepository;
 import com.timesphere.timesphere.repository.UserRepository;
 import com.timesphere.timesphere.util.JwtUtil;
@@ -35,7 +38,7 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request) {
         // Kiểm tra email trùng trước khi tạo user
         if (repository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email đã tồn tại, vui lòng chọn email khác.");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_REGISTERED);
         }
 
         var user = User.builder()
@@ -43,11 +46,12 @@ public class AuthenticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
                 .build();
-
+        // Gán mặc định FREE
+        user.setRole(Role.FREE);
         var savedUser = repository.save(user);
         System.out.println("✅ Lưu vào DB, email: " + savedUser.getEmail());
+
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
@@ -61,7 +65,7 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         // Kiểm tra email trước khi xác thực password
         var user = repository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Email chưa được đăng ký."));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -80,26 +84,6 @@ public class AuthenticationService {
                 .refreshToken(refreshToken)
                 .build();
     }
-//    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-//
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getEmail(),
-//                        request.getPassword()
-//                )
-//        );
-//        var user = repository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new IllegalArgumentException("Email chưa được đăng ký."));
-//        var jwtToken = jwtService.generateToken(user);
-//        var refreshToken = jwtService.generateRefreshToken(user);
-//        revokeAllUserTokens(user);
-//        saveUserToken(user, jwtToken);
-//        return AuthenticationResponse.builder()
-//                .accessToken(jwtToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//    }
-
 
     private void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()

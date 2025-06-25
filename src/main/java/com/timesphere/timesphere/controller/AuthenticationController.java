@@ -1,9 +1,11 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.AuthenticationRequest;
-import com.timesphere.timesphere.dto.AuthenticationResponse;
-import com.timesphere.timesphere.dto.RegisterRequest;
+import com.timesphere.timesphere.dto.request.AuthenticationRequest;
+import com.timesphere.timesphere.dto.request.ChangePasswordRequest;
+import com.timesphere.timesphere.dto.response.AuthenticationResponse;
+import com.timesphere.timesphere.dto.request.RegisterRequest;
 import com.timesphere.timesphere.service.AuthenticationService;
+import com.timesphere.timesphere.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -12,13 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthenticationController {
 
     private final AuthenticationService service;
+    private final UserService userService;
 
     //đăng ký
     @PostMapping("/register")
@@ -44,6 +49,7 @@ public class AuthenticationController {
     ) throws IOException {
         service.refreshToken(request, response);
     }
+
 
 
 }

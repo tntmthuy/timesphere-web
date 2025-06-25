@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.entity;
+package com.timesphere.timesphere.entity.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,8 @@ public enum Permission {
     ADMIN_CREATE("admin:create"),
     ADMIN_DELETE("admin:delete"),
     ADMIN_UPDATE("admin:update"),
+
+    TEAM_WORKSPACE("user:manage_team")
 
         ;
 

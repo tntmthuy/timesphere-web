@@ -1,8 +1,8 @@
 package com.timesphere.timesphere.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.timesphere.timesphere.entity.type.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,9 +32,6 @@ public class User implements UserDetails {
     @Column(length = 64, nullable = false)
     private String password;
 
-    //    @Column(nullable = false, unique = true)
-    private String username;
-
     private String firstname;
     private String lastname;
     private String gender;
@@ -54,8 +51,8 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "users")
     private List<FocusRoom> focusRooms;
 
-    @ManyToMany(mappedBy = "users")
-    private List<TeamWorkspace> teamWorkspaces;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeamMember> members;
 
     @OneToMany(mappedBy = "user")
     private List<TodoList> todoLists;
