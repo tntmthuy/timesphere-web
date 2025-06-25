@@ -9,6 +9,8 @@ spring:
     url: jdbc:mysql://localhost:3306/timesphere_test
     username: root
     password: root
+#  jackson:
+#    timezone: Asia/Ho_Chi_Minh
 
   jpa:
     hibernate:
@@ -32,3 +34,4 @@ logging:
     org:
       springframework:
         security: DEBUG
+

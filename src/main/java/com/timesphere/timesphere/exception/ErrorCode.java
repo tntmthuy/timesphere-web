@@ -40,6 +40,10 @@ public enum ErrorCode {
     ONLY_OWNER_CAN_REMOVE(2004, "Chỉ OWNER mới có quyền xoá thành viên.", HttpStatus.FORBIDDEN),
     CANNOT_REMOVE_SELF(2005, "Không thể tự rời nhóm khi bạn là OWNER duy nhất.", HttpStatus.BAD_REQUEST),
     DESCRIPTION_TOO_LONG(2006, "Mô tả nhóm tối đa 500 ký tự.", HttpStatus.BAD_REQUEST),
+    USER_NOT_IN_TEAM(2007, "Người dùng không phải là thành viên nhóm.", HttpStatus.NOT_FOUND),
+    NOT_JOINED_ANY_TEAM(2008, "Bạn chưa tham gia nhóm nào.", HttpStatus.BAD_REQUEST),
+    OWNER_CANNOT_LEAVE(2009, "OWNER không thể tự rời nhóm. Vui lòng chuyển quyền hoặc xoá nhóm.", HttpStatus.BAD_REQUEST),
+    CANNOT_KICK_SELF(2010, "Bạn không thể xoá chính mình khỏi nhóm.", HttpStatus.BAD_REQUEST),
 
     // === 300x: Password Policy ===
     CURRENT_PASSWORD_REQUIRED(3001, "Vui lòng nhập mật khẩu hiện tại.", HttpStatus.BAD_REQUEST),

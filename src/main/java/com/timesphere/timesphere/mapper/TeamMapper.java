@@ -15,12 +15,12 @@ public class TeamMapper {
 
         List<TeamMemberResponse> mappedMembers = members.stream()
                 .map(member -> TeamMemberResponse.builder()
-//                        .userId(member.getUser().getId())
+                        .userId(member.getUser().getId())
                         .email(member.getUser().getEmail())
                         .fullName(member.getUser().getFirstname() + " " + member.getUser().getLastname())
                         .avatarUrl(member.getUser().getAvatarUrl())
                         .teamRole(member.getTeamRole())
-//                        .joinedAt(member.getCreatedAt())
+                        .joinedAt(member.getCreatedAt()) // Lấy từ BaseEntity
                         .build())
                 .toList();
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class TeamMemberResponse {
-//    private String userId;
+    private String userId;
     private String email;
     private String fullName;
     private String avatarUrl;
