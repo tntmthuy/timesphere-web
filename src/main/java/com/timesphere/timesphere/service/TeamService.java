@@ -1,24 +1,24 @@
 package com.timesphere.timesphere.service;
 
-import com.timesphere.timesphere.dto.team.MemberInvite;
-import com.timesphere.timesphere.dto.team.TeamCreateRequest;
-import com.timesphere.timesphere.dto.team.TeamResponse;
-import com.timesphere.timesphere.dto.team.TeamUpdateRequest;
-import com.timesphere.timesphere.entity.TeamMember;
-import com.timesphere.timesphere.entity.TeamWorkspace;
-import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.dto.team.*;
+import com.timesphere.timesphere.entity.*;
+import com.timesphere.timesphere.entity.type.InvitationStatus;
+import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.type.TeamRole;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.mapper.TeamMapper;
+import com.timesphere.timesphere.repository.TeamInvitationRepository;
 import com.timesphere.timesphere.repository.TeamMemberRepository;
 import com.timesphere.timesphere.repository.TeamRepository;
 import com.timesphere.timesphere.repository.UserRepository;
+import com.timesphere.timesphere.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +27,12 @@ import java.util.Optional;
 public class TeamService {
 
     private final UserRepository userRepository;
+
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
+
+    private final TeamInvitationService invitationService;
+    private final TeamInvitationRepository invitationRepository;
 
     public TeamResponse createTeam(TeamCreateRequest request, User currentUser) {
         if (request.getTeamName() == null || request.getTeamName().isBlank()) {
@@ -49,11 +53,11 @@ public class TeamService {
                 .user(currentUser)
                 .team(team)
                 .teamRole(TeamRole.OWNER)
-//                .joinedAt(LocalDateTime.now()) // 👈 thêm dòng này
                 .build());
 
+        teamMemberRepository.saveAll(members);
 
-        // Mời thành viên
+        // Gửi lời mời cho những người khác
         if (request.getInvites() != null) {
             for (MemberInvite invite : request.getInvites()) {
                 String email = invite.getEmail();
@@ -62,17 +66,11 @@ public class TeamService {
                 User user = userRepository.findByEmail(email)
                         .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-                TeamRole role = invite.getRole() == TeamRole.OWNER ? TeamRole.MEMBER : invite.getRole(); // Bảo vệ OWNER
-
-                members.add(TeamMember.builder()
-                        .user(user)
-                        .team(team)
-                        .teamRole(role != null ? role : TeamRole.MEMBER)
-                        .build());
+                TeamRole role = invite.getRole() == TeamRole.OWNER ? TeamRole.MEMBER : invite.getRole();
+                invitationService.sendInvitation(team, user, currentUser, role != null ? role : TeamRole.MEMBER);
             }
         }
 
-        teamMemberRepository.saveAll(members);
         return TeamMapper.toDto(team, members);
     }
 
@@ -113,14 +111,32 @@ public class TeamService {
     //rời nhóm
     public void leaveTeam(String teamId, User currentUser) {
         TeamWorkspace team = findTeamOrThrow(teamId);
-        TeamMember member = teamMemberRepository.findByTeamAndUser(team, currentUser)
+        TeamMember leavingMember = teamMemberRepository.findByTeamAndUser(team, currentUser)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_JOINED_ANY_TEAM));
 
-        if (member.getTeamRole() == TeamRole.OWNER) {
-            throw new AppException(ErrorCode.OWNER_CANNOT_LEAVE);
+        boolean isOwner = leavingMember.getTeamRole() == TeamRole.OWNER;
+        long memberCount = teamMemberRepository.countByTeam(team);
+
+        if (isOwner) {
+            if (memberCount == 1) {
+                // Chỉ có 1 người → xoá nhóm
+                teamMemberRepository.delete(leavingMember);
+                teamRepository.delete(team);
+                return;
+            }
+
+            // Còn người khác → tự động chuyển quyền
+            List<TeamMember> candidates = teamMemberRepository.findAllByTeam(team).stream()
+                    .filter(m -> !m.getUser().getId().equals(currentUser.getId()))
+                    .sorted(Comparator.comparing(BaseEntity::getCreatedAt))
+                    .toList();
+
+            TeamMember newOwner = candidates.get(0);
+            newOwner.setTeamRole(TeamRole.OWNER);
+            teamMemberRepository.save(newOwner);
         }
 
-        teamMemberRepository.delete(member);
+        teamMemberRepository.delete(leavingMember);
     }
 
     //kick khỏi nhóm
@@ -173,11 +189,9 @@ public class TeamService {
     }
 
     //mời vào nhóm có sẵn
-    public TeamResponse addMembersToTeam(String teamId, List<MemberInvite> invites, User currentUser) {
+    public void addMembersToTeam(String teamId, List<MemberInvite> invites, User currentUser) {
         TeamWorkspace team = findTeamOrThrow(teamId);
         verifyIsOwner(team, currentUser);
-
-        List<TeamMember> newMembers = new ArrayList<>();
 
         for (MemberInvite invite : invites) {
             String email = invite.getEmail();
@@ -186,21 +200,66 @@ public class TeamService {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-            // Không cho mời lại người đã trong nhóm
-            boolean alreadyInTeam = teamMemberRepository.existsByTeamAndUser(team, user);
-            if (alreadyInTeam) {
-                throw new AppException(ErrorCode.USER_ALREADY_IN_TEAM);
-            }
+            // Gọi hàm kiểm tra hoàn chỉnh
+            // Kiểm tra thơi gian mời
+            // Kiểm tra đã mời nhưng chưa phản hồi
+            invitationService.validateInviteBeforeSending(team, user);
 
-            newMembers.add(TeamMember.builder()
-                    .user(user)
-                    .team(team)
-                    .teamRole(role == TeamRole.OWNER ? TeamRole.MEMBER : role)
-                    .build());
+            // Nếu qua được kiểm tra → gửi lời mời
+            invitationService.sendInvitation(team, user, currentUser,
+                    role == TeamRole.OWNER ? TeamRole.MEMBER : (role != null ? role : TeamRole.MEMBER));
+        }
+    }
+
+    //nhóm trưởng đổi vai trò thành viên
+    public TeamResponse updateMemberRole(String teamId, String targetUserId, RoleUpdateRequest request, User currentUser) {
+        TeamWorkspace team = findTeamOrThrow(teamId);
+        verifyIsOwner(team, currentUser);
+
+        if (targetUserId.equals(currentUser.getId())) {
+            throw new AppException(ErrorCode.CANNOT_CHANGE_OWN_ROLE);
         }
 
-        teamMemberRepository.saveAll(newMembers);
-        List<TeamMember> allMembers = teamMemberRepository.findAllByTeam(team);
-        return TeamMapper.toDto(team, allMembers);
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        TeamMember member = teamMemberRepository.findByTeamAndUser(team, targetUser)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_TEAM));
+
+        if (request.getNewRole() == TeamRole.OWNER) {
+            TeamMember owner = teamMemberRepository.findByTeamAndUser(team, currentUser)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_TEAM));
+            owner.setTeamRole(TeamRole.MEMBER);
+            teamMemberRepository.save(owner);
+        }
+
+        member.setTeamRole(
+                request.getNewRole() == TeamRole.OWNER ? TeamRole.OWNER : TeamRole.MEMBER
+        );
+        teamMemberRepository.save(member);
+
+        List<TeamMember> members = teamMemberRepository.findAllByTeam(team);
+        return TeamMapper.toDto(team, members);
     }
+
+    // Ngày dựa trên khoảng cách hiện tại
+    public List<InvitationResponse> getSentInvitations(String teamId, User currentUser) {
+        TeamWorkspace team = findTeamOrThrow(teamId);
+        verifyIsOwner(team, currentUser);
+
+        List<TeamInvitation> invites = invitationRepository.findAllByTeam(team);
+
+        return invites.stream().map(invite ->
+                new InvitationResponse(
+                        team.getId(),
+                        team.getTeamName(),
+                        invite.getInvitedRole(),
+                        invite.getStatus(),
+                        invite.getInvitedUser().getEmail(),
+                        invite.getCreatedAt(), // hoặc gọi timeAgo(invite.getCreatedAt()) nếu muốn kiểu "3 ngày trước"
+                        TimeUtils.timeAgo(invite.getCreatedAt())
+                )
+        ).toList();
+    }
+
 }

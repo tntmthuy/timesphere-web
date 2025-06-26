@@ -10,14 +10,11 @@ import java.util.stream.Collectors;
 
 import static com.timesphere.timesphere.entity.type.Permission.*;
 
+@Getter
 @RequiredArgsConstructor
 public enum Role {
     FREE(
             Set.of(
-                    FREE_READ,
-                    FREE_CREATE,
-                    FREE_DELETE,
-                    FREE_UPDATE,
 
                     FREE_POST_COMMENT,
                     TEAM_WORKSPACE
@@ -25,32 +22,17 @@ public enum Role {
     ),
     PREMIUM(
             Set.of(
-                    FREE_READ,
-                    FREE_CREATE,
-                    FREE_DELETE,
-                    FREE_UPDATE,
-
-                    PREMIUM_READ,
-                    PREMIUM_CREATE,
-                    PREMIUM_DELETE,
-                    PREMIUM_UPDATE,
-
                     TEAM_WORKSPACE
             )
     ),
     ADMIN(
             Set.of(
-                    ADMIN_READ,
-                    ADMIN_CREATE,
-                    ADMIN_DELETE,
-                    ADMIN_UPDATE,
                     ADMIN_READ_ALL_USERS,
 
                     TEAM_WORKSPACE
             )
     );
 
-    @Getter
     public final Set<Permission> permissions;
 
     public List<SimpleGrantedAuthority> getAuthorities() {

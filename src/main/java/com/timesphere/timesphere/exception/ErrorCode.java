@@ -42,8 +42,13 @@ public enum ErrorCode {
     DESCRIPTION_TOO_LONG(2006, "Mô tả nhóm tối đa 500 ký tự.", HttpStatus.BAD_REQUEST),
     USER_NOT_IN_TEAM(2007, "Người dùng không phải là thành viên nhóm.", HttpStatus.NOT_FOUND),
     NOT_JOINED_ANY_TEAM(2008, "Bạn chưa tham gia nhóm nào.", HttpStatus.BAD_REQUEST),
-    OWNER_CANNOT_LEAVE(2009, "OWNER không thể tự rời nhóm. Vui lòng chuyển quyền hoặc xoá nhóm.", HttpStatus.BAD_REQUEST),
     CANNOT_KICK_SELF(2010, "Bạn không thể xoá chính mình khỏi nhóm.", HttpStatus.BAD_REQUEST),
+    CANNOT_CHANGE_OWN_ROLE(2011, "Bạn không thể thay đổi vai trò của chính mình.", HttpStatus.BAD_REQUEST),
+
+    USER_ALREADY_INVITED(2013, "Người dùng đã được mời vào nhóm này.", HttpStatus.CONFLICT),
+    INVITATION_NOT_FOUND(2014, "Không tìm thấy lời mời tương ứng.", HttpStatus.NOT_FOUND),
+    TEAM_LIMIT_REACHED_FOR_FREE_USER(2015, "Tài khoản FREE chỉ được tham gia tối đa 5 nhóm.", HttpStatus.BAD_REQUEST),
+    INVITE_TOO_SOON(2016, "Vui lòng đợi 1 phút trước khi mời lại người dùng này.", HttpStatus.BAD_REQUEST),
 
     // === 300x: Password Policy ===
     CURRENT_PASSWORD_REQUIRED(3001, "Vui lòng nhập mật khẩu hiện tại.", HttpStatus.BAD_REQUEST),

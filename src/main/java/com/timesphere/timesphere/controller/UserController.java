@@ -20,7 +20,7 @@ public class UserController {
 
     // Đổi mật khẩu khi đã đăng nhập
     @PatchMapping("/change-password")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("")
     public ResponseEntity<?> changePassword(
             @Valid @RequestBody ChangePasswordRequest request,
             Principal connectUser
@@ -29,5 +29,15 @@ public class UserController {
         return ResponseEntity.ok(
                 ApiResponse.success("Đổi mật khẩu thành công!")
         );
+    }
+
+
+    @GetMapping("/search-invitable")
+    @PreAuthorize("hasAuthority('user:manage_team')")
+    public List<UserSuggestionDto> searchInvitableUsers(
+            @RequestParam String keyword,
+            @RequestParam String teamId
+    ) {
+        return userService.searchUsersForInvitation(keyword, teamId);
     }
 }

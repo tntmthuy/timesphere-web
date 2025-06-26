@@ -1,11 +1,10 @@
 package com.timesphere.timesphere.controller;
 
 import com.timesphere.timesphere.dto.response.ApiResponse;
-import com.timesphere.timesphere.dto.team.MemberInvite;
-import com.timesphere.timesphere.dto.team.TeamCreateRequest;
-import com.timesphere.timesphere.dto.team.TeamResponse;
-import com.timesphere.timesphere.dto.team.TeamUpdateRequest;
+import com.timesphere.timesphere.dto.team.*;
+import com.timesphere.timesphere.entity.TeamInvitation;
 import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.service.TeamInvitationService;
 import com.timesphere.timesphere.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,13 +48,13 @@ public class TeamController {
 
     //mời thêm thành viên
     @PostMapping("/{teamId}/members")
-    public ResponseEntity<TeamResponse> addMembers(
+    public ResponseEntity<?> addMembers(
             @PathVariable String teamId,
             @Valid @RequestBody List<@Valid MemberInvite> invites,
             @AuthenticationPrincipal User currentUser
     ) {
-        TeamResponse response = teamService.addMembersToTeam(teamId, invites, currentUser);
-        return ResponseEntity.ok(response);
+        teamService.addMembersToTeam(teamId, invites, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi lời mời thành công!"));
     }
 
     //lấy danh sách thành viên nhóm hiện tại
@@ -112,4 +111,18 @@ public class TeamController {
         teamService.deleteTeam(teamId, user);
         return ResponseEntity.ok(ApiResponse.success("Đã xoá nhóm thành công!"));
     }
+
+    //nhóm trưởng đổi vai trò thành viên
+    @PutMapping("/{teamId}/members/{userId}/role")
+    @PreAuthorize("hasAuthority('user:manage_team')")
+    public ResponseEntity<?> updateMemberRole(
+            @PathVariable String teamId,
+            @PathVariable String userId,
+            @Valid @RequestBody RoleUpdateRequest request,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        TeamResponse updatedTeam = teamService.updateMemberRole(teamId, userId, request, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật vai trò thành công!", updatedTeam));
+    }
+
 }

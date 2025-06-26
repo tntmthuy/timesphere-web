@@ -109,4 +109,16 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
+    // Tìm người dùng để mời vào team
+    public List<UserSuggestionDto> searchUsersForInvitation(String keyword, String teamId) {
+        List<User> users = userRepository.searchUsersNotInTeamWithNoPendingInvite(keyword, teamId);
+        return users.stream()
+                .map(u -> new UserSuggestionDto(
+                        u.getId(),
+                        u.getFirstname() + " " + u.getLastname(),
+                        u.getEmail(),
+                        u.getAvatarUrl()))
+                .toList();
+    }
 }

@@ -24,4 +24,11 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Integer>
 
     // Xoá toàn bộ thành viên khi xoá nhóm
     void deleteAllByTeam(TeamWorkspace team);
+
+    // Đếm dố thành viên
+    long countByTeam(TeamWorkspace team);
+
+    // Đếm thành viên đã tham gia mấy nhóm
+    // Để check xem Role Free có đủ 5 nhóm chưa
+    long countByUser(User user);
 }

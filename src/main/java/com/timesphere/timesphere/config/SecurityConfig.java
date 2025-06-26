@@ -37,27 +37,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
                                 .requestMatchers("/api").hasRole(ADMIN.name())
-
-//                                .requestMatchers("/api/user/**").permitAll()
-
-//                        .requestMatchers("/api/admin/**").hasRole(ADMIN.name()) // ✅ Chỉ Admin được truy cập
-//                        .requestMatchers(GET,"/api/admin/**").hasAuthority(ADMIN_READ.name())
-//                        .requestMatchers(POST,"/api/admin/**").hasAuthority(ADMIN_CREATE.name())
-//                        .requestMatchers(PUT,"/api/admin/**").hasAuthority(ADMIN_UPDATE.name())
-//                        .requestMatchers(DELETE,"/api/admin/**").hasAuthority(ADMIN_DELETE.name())
-//
-//                        .requestMatchers("/api/premium/**").hasRole(PREMIUM.name()) // ✅ Chỉ Premium User được truy cập
-//                        .requestMatchers(GET,"/api/premium/**").hasAuthority(PREMIUM_READ.name())
-//                        .requestMatchers(POST,"/api/premium/**").hasAuthority(PREMIUM_CREATE.name())
-//                        .requestMatchers(PUT,"/api/premium/**").hasAuthority(PREMIUM_UPDATE.name())
-//                        .requestMatchers(DELETE,"/api/premium/**").hasAuthority(PREMIUM_DELETE.name())
-//
-//                        .requestMatchers("/api/user/**").hasAnyRole(FREE.name(), PREMIUM.name()) // ✅ Người dùng thông thường & Premium đều được phép
-//                        .requestMatchers(GET,"/api/user/**").hasAnyAuthority(FREE_READ.name(),PREMIUM_READ.name())
-//                        .requestMatchers(POST,"/api/user/**").hasAnyAuthority(FREE_CREATE.name(), PREMIUM_CREATE.name())
-//                        .requestMatchers(PUT,"/api/user/**").hasAnyAuthority(FREE_UPDATE.name(), PREMIUM_UPDATE.name())
-//                        .requestMatchers(DELETE,"/api/user/**").hasAnyAuthority(FREE_DELETE.name(), PREMIUM_DELETE.name())
-
                                 .anyRequest().authenticated()
 
                 )
@@ -79,14 +58,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-//    @Bean
-//    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-//        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-//        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities"); // Xác nhận trường authorities
-//        grantedAuthoritiesConverter.setAuthorityPrefix(""); // Không thêm ROLE_ trước quyền hạn
-//
-//        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-//        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-//        return jwtAuthenticationConverter;
-//    }
+
 }
