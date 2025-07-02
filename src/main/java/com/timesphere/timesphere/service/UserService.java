@@ -4,6 +4,7 @@ import com.timesphere.timesphere.dao.SearchRequest;
 import com.timesphere.timesphere.dao.UserSearchDao;
 import com.timesphere.timesphere.dto.request.ChangePasswordRequest;
 import com.timesphere.timesphere.dto.request.CommentRequest;
+import com.timesphere.timesphere.dto.user.UserSuggestionResponse;
 import com.timesphere.timesphere.entity.Comment;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.exception.AppException;
@@ -20,6 +21,9 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,53 +35,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+    //cái này của admin
     public List<User> searchUsers(SearchRequest request) {
         return userSearchDao.findAllByCriteria(request);
     }
-
-    //test
-    public String postComment(CommentRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        Comment comment = Comment.builder()
-                .content(request.getContent())
-                .cmt_create_at(LocalDateTime.now())
-                .cmt_by(user)
-                .build();
-
-        commentRepository.save(comment);
-        return formatComment(comment);
-    }
-
-    private String formatComment(Comment comment) {
-        return String.format("Comment content <<%s>> from: %s",
-                comment.getContent(),
-                comment.getCmt_by().getFirstname().toUpperCase());
-    }
-
-
-    //devteria
-//    public User createUser(UserCreationRequest request){
-//        User user = new User();
-//
-//        user.setEmail(request.getEmail());
-//        user.setPassword(request.getPassword());
-//        user.setFirstname(request.getFirst_name());
-//        user.setLastname(request.getLast_name());
-//
-//        return userRepository.save(user);
-//    }
-//
-//    public User updateUser(String userId, UserUpdateRequest request){
-//        User user = getUser(userId);
-//
-//        user.setPassword(request.getPassword());
-//        user.setFirstname(request.getFirst_name());
-//        user.setLastname(request.getLast_name());
-//
-//        return userRepository.save(user);
-//    }
 
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
@@ -110,15 +72,21 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Tìm người dùng để mời vào team
-    public List<UserSuggestionDto> searchUsersForInvitation(String keyword, String teamId) {
-        List<User> users = userRepository.searchUsersNotInTeamWithNoPendingInvite(keyword, teamId);
+
+    public List<UserSuggestionResponse> searchUsersForNewTeam(String keyword) {
+        List<User> users = (keyword == null || keyword.isBlank())
+                ? userRepository.suggestUsersForNewTeamDefault()
+                : userRepository.searchUsersForNewTeam(keyword);
+
         return users.stream()
-                .map(u -> new UserSuggestionDto(
+                .map(u -> new UserSuggestionResponse(
                         u.getId(),
-                        u.getFirstname() + " " + u.getLastname(),
+                        Stream.of(u.getFirstname(), u.getLastname())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.joining(" ")),
                         u.getEmail(),
-                        u.getAvatarUrl()))
+                        u.getAvatarUrl()
+                ))
                 .toList();
     }
 }

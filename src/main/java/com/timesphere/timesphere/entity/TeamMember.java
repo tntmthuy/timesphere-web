@@ -31,10 +31,4 @@ public class TeamMember extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TeamRole teamRole; // OWNER, MEMBER...
 
-//    private LocalDateTime joinedAt;
-//
-//    @PrePersist
-//    protected void onJoin() {
-//        this.joinedAt = LocalDateTime.now();
-//    }
 }

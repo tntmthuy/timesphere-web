@@ -1,9 +1,7 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.request.AuthenticationRequest;
-import com.timesphere.timesphere.dto.request.ChangePasswordRequest;
+import com.timesphere.timesphere.dto.request.*;
 import com.timesphere.timesphere.dto.response.AuthenticationResponse;
-import com.timesphere.timesphere.dto.request.RegisterRequest;
 import com.timesphere.timesphere.service.AuthenticationService;
 import com.timesphere.timesphere.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -27,11 +26,15 @@ public class AuthenticationController {
 
     //đăng ký
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<?> register(
             @Valid @RequestBody RegisterRequest request
     ) {
+        var response = service.register(request);
+        if (request.isMfaEnabled()) {
+            return ResponseEntity.ok(response);
+        }
         System.out.println("🔍 Đăng ký email: " + request.getEmail());
-        return ResponseEntity.ok(service.register(request));
+        return ResponseEntity.accepted().build();
     }
 
     //đăng nhập
@@ -50,6 +53,18 @@ public class AuthenticationController {
         service.refreshToken(request, response);
     }
 
+    //
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyCode(
+            @RequestBody VerificationRequest verificationRequest
+    ) {
+        return ResponseEntity.ok(service.verifyCode(verificationRequest));
 
+    }
 
+    @PostMapping("/resend-secret")
+    public ResponseEntity<?> resendSecret(@RequestBody EmailRequest request) {
+        String newQrUri = service.regenerateSecretAndReturnQr(request.getEmail());
+        return ResponseEntity.ok(Map.of("secretImageUri", newQrUri));
+    }
 }

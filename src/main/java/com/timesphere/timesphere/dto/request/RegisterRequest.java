@@ -30,4 +30,6 @@ public class RegisterRequest {
     private String firstname;
     private String lastname;
 
+    //xác thực 2 yếu tố
+    private boolean mfaEnabled;
 }

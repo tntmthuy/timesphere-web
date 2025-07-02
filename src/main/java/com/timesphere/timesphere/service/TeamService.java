@@ -13,6 +13,7 @@ import com.timesphere.timesphere.repository.TeamMemberRepository;
 import com.timesphere.timesphere.repository.TeamRepository;
 import com.timesphere.timesphere.repository.UserRepository;
 import com.timesphere.timesphere.util.TimeUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,11 +35,28 @@ public class TeamService {
     private final TeamInvitationService invitationService;
     private final TeamInvitationRepository invitationRepository;
 
+    private void validateTeamMemberLimit(TeamWorkspace team, int incomingCount) {
+        long currentCount = teamMemberRepository.countByTeam(team);
+        if (currentCount + incomingCount > 20) {
+            throw new AppException(ErrorCode.MAX_TEAM_MEMBER_REACHED,
+                    "Mỗi nhóm chỉ được tối đa 20 thành viên. Hiện tại đã có " + currentCount + " người.");
+        }
+    }
+
     public TeamResponse createTeam(TeamCreateRequest request, User currentUser) {
         if (request.getTeamName() == null || request.getTeamName().isBlank()) {
             throw new AppException(ErrorCode.TEAM_NAME_REQUIRED);
         }
 
+        // Kiểm tra quota nếu user thuộc gói FREE
+        if (currentUser.getRole() == Role.FREE) {
+            long count = teamMemberRepository.countByUser(currentUser);
+            if (count >= 5) {
+                throw new AppException(ErrorCode.TEAM_CREATE_LIMIT_FOR_FREE_USER);
+            }
+        }
+
+        // Tạo nhóm
         TeamWorkspace team = TeamWorkspace.builder()
                 .teamName(request.getTeamName())
                 .createdBy(currentUser)
@@ -46,19 +64,18 @@ public class TeamService {
                 .build();
         teamRepository.save(team);
 
-        List<TeamMember> members = new ArrayList<>();
-
         // Người tạo là OWNER
+        List<TeamMember> members = new ArrayList<>();
         members.add(TeamMember.builder()
                 .user(currentUser)
                 .team(team)
                 .teamRole(TeamRole.OWNER)
                 .build());
-
         teamMemberRepository.saveAll(members);
 
-        // Gửi lời mời cho những người khác
+        // Gửi lời mời nếu có
         if (request.getInvites() != null) {
+            validateTeamMemberLimit(team, request.getInvites().size());
             for (MemberInvite invite : request.getInvites()) {
                 String email = invite.getEmail();
                 if (email == null || email.equalsIgnoreCase(currentUser.getEmail())) continue;
@@ -158,6 +175,7 @@ public class TeamService {
     }
 
     //xóa nhóm
+    @Transactional
     public void deleteTeam(String teamId, User currentUser) {
         TeamWorkspace team = findTeamOrThrow(teamId);
         verifyIsOwner(team, currentUser);
@@ -192,7 +210,7 @@ public class TeamService {
     public void addMembersToTeam(String teamId, List<MemberInvite> invites, User currentUser) {
         TeamWorkspace team = findTeamOrThrow(teamId);
         verifyIsOwner(team, currentUser);
-
+        validateTeamMemberLimit(team, invites.size());
         for (MemberInvite invite : invites) {
             String email = invite.getEmail();
             TeamRole role = invite.getRole();

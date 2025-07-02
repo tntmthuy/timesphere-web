@@ -2,6 +2,7 @@ package com.timesphere.timesphere.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.timesphere.timesphere.entity.type.Role;
+import com.timesphere.timesphere.entity.type.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +37,14 @@ public class User implements UserDetails {
     private String lastname;
     private String gender;
     private String avatarUrl;
-    private boolean status;
+
+    //xác thực 2 yếu tố
+    private boolean mfaEnabled;
+    private String secret;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     private LocalDateTime user_create_at;
     private LocalDateTime user_update_at;
 

@@ -1,6 +1,7 @@
 package com.timesphere.timesphere.service;
 
 import com.timesphere.timesphere.dto.team.InvitationResponse;
+import com.timesphere.timesphere.dto.user.UserSuggestionResponse;
 import com.timesphere.timesphere.entity.TeamInvitation;
 import com.timesphere.timesphere.entity.TeamMember;
 import com.timesphere.timesphere.entity.TeamWorkspace;
@@ -13,6 +14,7 @@ import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.repository.TeamInvitationRepository;
 import com.timesphere.timesphere.repository.TeamMemberRepository;
 import com.timesphere.timesphere.repository.TeamRepository;
+import com.timesphere.timesphere.repository.UserRepository;
 import com.timesphere.timesphere.util.TimeUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,20 @@ public class TeamInvitationService {
     private final TeamInvitationRepository invitationRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
+    private final UserRepository userRepository;
+
+
+    // Tìm người dùng chưa trong team để mời vào team
+    public List<UserSuggestionResponse> searchUsersForInvitation(String keyword, String teamId) {
+        List<User> users = userRepository.searchUsersNotInTeamWithNoPendingInvite(keyword, teamId);
+        return users.stream()
+                .map(u -> new UserSuggestionResponse(
+                        u.getId(),
+                        u.getFirstname() + " " + u.getLastname(),
+                        u.getEmail(),
+                        u.getAvatarUrl()))
+                .toList();
+    }
 
     private TeamWorkspace findTeamOrThrow(String teamId) {
         return teamRepository.findById(teamId)

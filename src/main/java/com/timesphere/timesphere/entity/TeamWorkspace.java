@@ -1,5 +1,6 @@
 package com.timesphere.timesphere.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,5 +32,8 @@ public class TeamWorkspace extends BaseEntity{
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<TeamMember> members;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KanbanColumn> columns;
 
 }

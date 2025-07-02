@@ -24,6 +24,7 @@ application:
     jwt:
       secret-key: 6bc4b66bb91521758a881387561d819f5bf6609597e51d4cc110944f01051695b4781a2381584d900315da8121d4f19cf8dbed662ab8ee4977a6c6b3bbd353e5
       expiration: 86400000 # a day
+#      expiration: 60000 # 👈 1 phút = 60_000ms
       refresh-token:
         expiration: 604800000 # 7 days
 
