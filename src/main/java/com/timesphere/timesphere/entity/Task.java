@@ -50,7 +50,14 @@ public class Task extends BaseEntity{
     @OneToMany(mappedBy = "parentTask", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Task> subTasks;
 
-    @ManyToOne
-    private User assignedTo;
+    @ManyToMany
+    @JoinTable(
+            name = "task_assignees",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_member_id")
+    )
+    private List<TeamMember> assignees;
 
+    @ManyToMany(mappedBy = "assignees")
+    private List<Task> tasks; //những ai được giao task
 }

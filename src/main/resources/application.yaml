@@ -28,6 +28,11 @@ application:
       refresh-token:
         expiration: 604800000 # 7 days
 
+cloudinary:
+  cloud-name: dqcjvoc1n
+  api-key: 988565959843483
+  api-secret: F9WQ4g2TmcB7QZVU-9HMMQJlVOs
+
 logging:
   level:
     org:

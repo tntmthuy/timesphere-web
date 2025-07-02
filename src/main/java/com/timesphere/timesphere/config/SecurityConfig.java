@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
+                                .requestMatchers("/api/upload/**").permitAll()
                                 .requestMatchers("/api").hasRole(ADMIN.name())
                                 .anyRequest().authenticated()
 
