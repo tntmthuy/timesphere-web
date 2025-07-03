@@ -1,5 +1,6 @@
 package com.timesphere.timesphere.entity;
 
+import com.timesphere.timesphere.entity.type.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,15 +17,16 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String message;
+    private String message;         // Nội dung chính hiển thị
+    private Boolean isRead;         // Đã đọc hay chưa
+    private String targetUrl;       // FE biết chuyển hướng đến đâu
 
-    private Boolean isRead;
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;  // Loại thông báo (TAGGED, ASSIGNED...)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User recipient;
+    private User recipient;         // Người nhận thông báo
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User sender;
-
-    private String targetUrl; // Ví dụ: /tasks/{id} hoặc /comments/{id}
+    private User sender;            // Người tạo ra sự kiện
 }

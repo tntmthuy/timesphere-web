@@ -1,5 +1,10 @@
-package com.timesphere.timesphere.dto.task;
+package com.timesphere.timesphere.dto.kanban;
 
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
 public class TaskAssigneeDTO {
     private String id; // teamMemberId
     private String userId;

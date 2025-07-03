@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,8 +45,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    private LocalDateTime user_create_at;
-    private LocalDateTime user_update_at;
+//    private LocalDateTime user_create_at;
+//    private LocalDateTime user_update_at;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -69,8 +69,10 @@ public class User implements UserDetails {
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
 
-    @OneToMany(mappedBy = "cmt_by", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+
+    public String getFullName() {
+        return firstname + " " + lastname;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

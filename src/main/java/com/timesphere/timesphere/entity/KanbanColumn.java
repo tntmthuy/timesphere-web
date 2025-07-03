@@ -6,12 +6,12 @@ import lombok.*;
 
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "kanban_column")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @EqualsAndHashCode(callSuper = false)
 public class KanbanColumn extends BaseEntity {
 
@@ -19,15 +19,16 @@ public class KanbanColumn extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String name;
-    private Integer position;
+    @Column(nullable = false)
+    private String title; // Ví dụ: "To Do", "In Progress", "Done"
 
-    @JsonIgnore
+    private Integer position; // vị trí trong bảng Kanban (0, 1, 2...)
+
     @ManyToOne(fetch = FetchType.LAZY)
-    private TeamWorkspace team;
+    @JoinColumn(name = "team_id")
+    private TeamWorkspace team; // mỗi column thuộc 1 team (workspace)
 
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks;
-
 }
 

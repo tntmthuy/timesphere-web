@@ -1,0 +1,26 @@
+package com.timesphere.timesphere.mapper;
+
+import com.timesphere.timesphere.dto.kanban.KanbanColumnDTO;
+import com.timesphere.timesphere.dto.kanban.TaskResponseDTO;
+import com.timesphere.timesphere.entity.KanbanColumn;
+
+import java.util.List;
+import java.util.Optional;
+
+public class KanbanColumnMapper {
+
+    public static KanbanColumnDTO toDto(KanbanColumn column) {
+        List<TaskResponseDTO> taskDtos = Optional.ofNullable(column.getTasks())
+                .orElse(List.of())
+                .stream()
+                .map(TaskMapper::toDto)
+                .toList();
+
+        return KanbanColumnDTO.builder()
+                .id(column.getId())
+                .title(column.getTitle())
+                .position(column.getPosition())
+                .tasks(taskDtos)
+                .build();
+    }
+}
