@@ -1,10 +1,10 @@
 package com.timesphere.timesphere.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.timesphere.timesphere.dto.request.AuthenticationRequest;
-import com.timesphere.timesphere.dto.request.VerificationRequest;
-import com.timesphere.timesphere.dto.response.AuthenticationResponse;
-import com.timesphere.timesphere.dto.request.RegisterRequest;
+import com.timesphere.timesphere.dto.auth.AuthenticationRequest;
+import com.timesphere.timesphere.dto.auth.VerificationRequest;
+import com.timesphere.timesphere.dto.auth.AuthenticationResponse;
+import com.timesphere.timesphere.dto.auth.RegisterRequest;
 import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.Token;
 import com.timesphere.timesphere.entity.type.TokenType;
@@ -24,6 +24,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,11 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     private final TwoFactorAuthenticationService tfaService;
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (User) authentication.getPrincipal();
+    }
 
     public AuthenticationResponse register(RegisterRequest request) {
         // Kiểm tra email trùng trước khi tạo user

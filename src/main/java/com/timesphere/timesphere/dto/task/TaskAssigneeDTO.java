@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.dto.kanban;
+package com.timesphere.timesphere.dto.task;
 
 import lombok.Builder;
 import lombok.Data;

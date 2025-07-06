@@ -1,5 +1,6 @@
 package com.timesphere.timesphere.dto.kanban;
 
+import com.timesphere.timesphere.dto.task.TaskResponseDTO;
 import lombok.Builder;
 import lombok.Data;
 

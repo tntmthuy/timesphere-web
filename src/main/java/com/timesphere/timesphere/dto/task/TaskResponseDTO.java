@@ -1,5 +1,6 @@
-package com.timesphere.timesphere.dto.kanban;
+package com.timesphere.timesphere.dto.task;
 
+import com.timesphere.timesphere.dto.subtask.SubtaskDTO;
 import com.timesphere.timesphere.entity.type.Priority;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class TaskResponseDTO {
     private List<TaskAssigneeDTO> assignees;
     private List<SubtaskDTO> subTasks;
 
-    private Double progress; // Tỷ lệ subtask hoàn thành (0.0 → 1.0)
+    private Double progress;         // Tỷ lệ hoàn thành dạng thập phân (0.0 → 1.0)
+    private String progressDisplay; // Ví dụ: "3/7" - để UI hiển thị cạnh progress bar
 }

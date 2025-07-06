@@ -1,7 +1,10 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.request.*;
-import com.timesphere.timesphere.dto.response.AuthenticationResponse;
+import com.timesphere.timesphere.dto.auth.AuthenticationRequest;
+import com.timesphere.timesphere.dto.auth.EmailRequest;
+import com.timesphere.timesphere.dto.auth.RegisterRequest;
+import com.timesphere.timesphere.dto.auth.VerificationRequest;
+import com.timesphere.timesphere.dto.auth.AuthenticationResponse;
 import com.timesphere.timesphere.service.AuthenticationService;
 import com.timesphere.timesphere.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Map;
 
 @RestController

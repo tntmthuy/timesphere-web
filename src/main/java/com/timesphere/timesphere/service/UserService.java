@@ -2,13 +2,12 @@ package com.timesphere.timesphere.service;
 
 import com.timesphere.timesphere.dao.SearchRequest;
 import com.timesphere.timesphere.dao.UserSearchDao;
-import com.timesphere.timesphere.dto.request.ChangePasswordRequest;
+import com.timesphere.timesphere.dto.auth.ChangePasswordRequest;
 import com.timesphere.timesphere.dto.user.UserSuggestionResponse;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.exception.UserNotFoundException;
-import com.timesphere.timesphere.repository.CommentRepository;
 import com.timesphere.timesphere.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +26,6 @@ public class UserService {
 
 
     private final UserSearchDao userSearchDao;
-    private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 

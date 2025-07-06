@@ -106,7 +106,7 @@ public class TeamService {
         return TeamMapper.toDto(team, getMembers(team));
     }
 
-    //lấy tất cả thành viên team hiện tại
+    //lấy tất cả thành viên team hiện tại đang tham gia
     public List<TeamResponse> getAllTeamsOfUser(User user) {
         List<TeamMember> memberships = teamMemberRepository.findAllByUser(user);
         List<TeamResponse> result = new ArrayList<>();
@@ -280,4 +280,7 @@ public class TeamService {
         ).toList();
     }
 
+    public TeamWorkspace getTeamByIdOrThrow(String id) {
+        return findTeamOrThrow(id);
+    }
 }

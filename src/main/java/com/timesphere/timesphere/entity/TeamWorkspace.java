@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -34,6 +35,6 @@ public class TeamWorkspace extends BaseEntity{
 
     @JsonIgnore
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<KanbanColumn> columns;
+    private Set<KanbanColumn> columns;
 
 }

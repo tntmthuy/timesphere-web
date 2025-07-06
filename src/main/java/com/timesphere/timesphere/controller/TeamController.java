@@ -1,10 +1,11 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.response.ApiResponse;
+import com.timesphere.timesphere.dto.auth.ApiResponse;
+import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.team.*;
-import com.timesphere.timesphere.entity.TeamInvitation;
+import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
-import com.timesphere.timesphere.service.TeamInvitationService;
+import com.timesphere.timesphere.service.TeamMemberService;
 import com.timesphere.timesphere.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final TeamMemberService teamMemberService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('user:manage_team')")
@@ -57,7 +59,7 @@ public class TeamController {
         return ResponseEntity.ok(ApiResponse.success("Đã gửi lời mời thành công!"));
     }
 
-    //lấy danh sách thành viên nhóm hiện tại
+    //lấy danh sách thành viên nhóm hiện tại (thông tin tổng quan)
     @GetMapping("/{teamId}")
     @PreAuthorize("hasAuthority('user:manage_team')")
     public ResponseEntity<?> getTeamDetail(
@@ -125,4 +127,30 @@ public class TeamController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật vai trò thành công!", updatedTeam));
     }
 
+
+    //Member
+    // Lấy danh sách thành viên nhóm với các thong tin cơ bản
+    @GetMapping("/{teamId}/members")
+    @PreAuthorize("hasAuthority('user:manage_team')")
+    public ResponseEntity<?> getTeamMembers(
+            @PathVariable String teamId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        TeamWorkspace team = teamService.getTeamByIdOrThrow(teamId); // có thể tạo sẵn hàm này để dùng chung
+        List<TeamMemberDTO> members = teamMemberService.getMembersOfTeam(teamId, currentUser, team);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách thành viên thành công!", members));
+    }
+
+    // Tìm kiếm thanh viên trong team
+    @GetMapping("/{teamId}/members/search")
+    @PreAuthorize("hasAuthority('user:manage_team')")
+    public ResponseEntity<?> searchTeamMembers(
+            @PathVariable String teamId,
+            @RequestParam(required = false) String keyword,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        String safeKeyword = keyword == null ? "" : keyword.trim();
+        var result = teamMemberService.searchMembersInTeam(teamId, safeKeyword, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Gợi ý thành viên phù hợp", result));
+    }
 }

@@ -1,6 +1,6 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.response.ApiResponse;
+import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.service.TeamInvitationService;
 import lombok.RequiredArgsConstructor;

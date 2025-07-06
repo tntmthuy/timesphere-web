@@ -25,13 +25,12 @@ public class CloudinaryService {
     }
 
     public CloudinaryUploadResult uploadFile(MultipartFile file, String folder) throws IOException {
-        Cloudinary cloudinary = getCloudinary();
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File rỗng, không thể upload.");
+        }
 
-        Map<String, Object> options = new HashMap<>();
-        options.put("folder", folder); // ví dụ: "avatars/", "attachments/comments/"
-
-        Map<String, Object> uploadResult = cloudinary.uploader()
-                .upload(file.getBytes(), options);
+        Map<String, Object> options = Map.of("folder", folder);
+        Map<String, Object> uploadResult = getCloudinary().uploader().upload(file.getBytes(), options);
 
         return CloudinaryUploadResult.builder()
                 .url(uploadResult.get("secure_url").toString())
@@ -44,4 +43,16 @@ public class CloudinaryService {
     public void deleteFile(String publicId) throws IOException {
         getCloudinary().uploader().destroy(publicId, ObjectUtils.emptyMap());
     }
+
+    public String extractCloudinaryId(String url) {
+        final String UPLOAD_PATH = "/upload/";
+        int index = url.indexOf(UPLOAD_PATH);
+        if (index == -1) return null;
+
+        String afterUpload = url.substring(index + UPLOAD_PATH.length());
+        return afterUpload.contains(".")
+                ? afterUpload.substring(0, afterUpload.lastIndexOf('.'))
+                : afterUpload;
+    }
 }
+

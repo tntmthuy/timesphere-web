@@ -1,6 +1,6 @@
 package com.timesphere.timesphere.mapper;
 
-import com.timesphere.timesphere.dto.kanban.TaskAssigneeDTO;
+import com.timesphere.timesphere.dto.task.TaskAssigneeDTO;
 import com.timesphere.timesphere.entity.TeamMember;
 import com.timesphere.timesphere.entity.User;
 

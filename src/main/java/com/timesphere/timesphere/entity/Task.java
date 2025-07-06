@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -46,9 +47,8 @@ public class Task extends BaseEntity{
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
-
     @OneToMany(mappedBy = "parentTask", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Task> subTasks;
+    private List<Task> subTasks = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -56,8 +56,8 @@ public class Task extends BaseEntity{
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "team_member_id")
     )
-    private List<TeamMember> assignees;
+    private List<TeamMember> assignees = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "assignees")
-    private List<Task> tasks; //những ai được giao task
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskComment> comments = new ArrayList<>();
 }

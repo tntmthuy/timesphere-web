@@ -59,6 +59,20 @@ public enum ErrorCode {
     CURRENT_PASSWORD_REQUIRED(3001, "Vui lòng nhập mật khẩu hiện tại.", BAD_REQUEST),
     NEW_PASSWORD_REQUIRED(3002, "Vui lòng nhập mật khẩu mới.", BAD_REQUEST),
     CONFIRMATION_PASSWORD_REQUIRED(3003, "Vui lòng nhập xác nhận mật khẩu.", BAD_REQUEST),
+
+    // === 400x: Kanban ===
+    TASK_NOT_FOUND(4001, "Không tìm thấy task.", NOT_FOUND),
+    COLUMN_NOT_FOUND(4002, "Không tìm thấy cột Kanban.", NOT_FOUND),
+    INVALID_COLUMN_POSITION(4003, "Vị trí của cột không hợp lệ.", BAD_REQUEST),
+    TASK_TITLE_REQUIRED(4004, "Vui lòng nhập tiêu đề task.", BAD_REQUEST),
+    COMMENT_NOT_FOUND(4005, "Không tìm thấy bình luận.", HttpStatus.NOT_FOUND),
+
+    // === 410x: Subtask ===
+    SUBTASK_NOT_FOUND(4101, "Không tìm thấy subtask.", NOT_FOUND),
+    SUBTASK_INVALID_PARENT(4102, "Không hợp lệ vì task này không phải subtask.", BAD_REQUEST),
+    SUBTASK_TITLE_REQUIRED(4103, "Vui lòng nhập nội dung subtask.", BAD_REQUEST),
+    INVALID_SUBTASK_POSITION(4104, "Vị trí subtask không hợp lệ.", BAD_REQUEST),
+
     ;
     private final int code;
     private final String message;

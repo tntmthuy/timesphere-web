@@ -19,14 +19,18 @@ public class Attachment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String name;           // Tên gốc của file
-    private String url;            // Link CDN từ Cloudinary
-    private String fileType;       // MIME Type (image/png, application/pdf, ...)
-    private String cloudId;        // Public ID bên Cloudinary
+    private String name;         // Tên file gốc người dùng upload
+    private String url;          // Link CDN từ Cloudinary
+    private String fileType;     // MIME type: image/png, application/pdf,...
+    private Long size;           // Kích thước file tính bằng byte
+    private String displaySize;
+    private String cloudId;      // Public ID bên Cloudinary để xoá nếu cần
 
     @Enumerated(EnumType.STRING)
-    private AttachmentType type;   // IMAGE hoặc FILE
+    private AttachmentType type; // IMAGE hoặc FILE (dựa theo fileType)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private TaskComment comment;   // Comment chứa file này
+    @JoinColumn(name = "comment_id") // thêm rõ ràng tên cột khoá ngoại
+    private TaskComment comment;
+
 }

@@ -1,12 +1,14 @@
 package com.timesphere.timesphere.exception;
 
-import com.timesphere.timesphere.dto.response.ApiResponse;
+import com.timesphere.timesphere.dto.auth.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -116,4 +118,25 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(fallback);
     }
+
+
+    //thiếu tham số
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.<Void>builder()
+                .code(ErrorCode.INVALID_KEY.getCode())
+                .message("Thiếu tham số: " + ex.getParameterName())
+                .build());
+    }
+
+    //gọi sai method
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(405).body(ApiResponse.<Void>builder()
+                .code(405)
+                .message("Phương thức không được hỗ trợ!")
+                .build());
+    }
+
+
 }

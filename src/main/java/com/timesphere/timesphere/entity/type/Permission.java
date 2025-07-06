@@ -10,7 +10,11 @@ public enum Permission {
 
     ADMIN_READ_ALL_USERS("admin:read_all_users"),
 
-    TEAM_WORKSPACE("user:manage_team");
+    TEAM_WORKSPACE("user:manage_team"),
+
+    KANBAN_BOARD("user:manage_board")
+
+    ;
 
     private final String permission;
 }

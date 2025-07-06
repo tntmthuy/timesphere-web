@@ -31,4 +31,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Integer>
     // Đếm thành viên đã tham gia mấy nhóm
     // Để check xem Role Free có đủ 5 nhóm chưa
     long countByUser(User user);
+
+    Optional<TeamMember> findByUserIdAndTeamId(String userId, String teamId);
+
 }

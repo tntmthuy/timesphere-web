@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.dto.request;
+package com.timesphere.timesphere.dto.auth;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

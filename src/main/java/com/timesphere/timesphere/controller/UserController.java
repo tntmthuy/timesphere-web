@@ -1,8 +1,7 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.request.ChangePasswordRequest;
-import com.timesphere.timesphere.dto.response.ApiResponse;
-import com.timesphere.timesphere.dto.user.UserSuggestionResponse;
+import com.timesphere.timesphere.dto.auth.ChangePasswordRequest;
+import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.service.TeamInvitationService;
 import com.timesphere.timesphere.service.UserService;
 import jakarta.validation.Valid;
@@ -12,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")

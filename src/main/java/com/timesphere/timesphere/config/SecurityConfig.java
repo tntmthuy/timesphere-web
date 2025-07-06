@@ -21,7 +21,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-import static com.timesphere.timesphere.entity.type.Role.ADMIN;
+import static com.timesphere.timesphere.entity.type.Role.*;
+import static com.timesphere.timesphere.entity.type.Role.PREMIUM;
 
 @Slf4j
 @Configuration
@@ -40,10 +41,12 @@ public class SecurityConfig {
                 .and()
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
-                                .requestMatchers("/api/upload/**").permitAll()
-                                .requestMatchers("/api").hasRole(ADMIN.name())
-                                .anyRequest().authenticated()
+                        .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
+                        .requestMatchers("/api/upload/**").hasAnyRole(FREE.name(), PREMIUM.name())
+                        .requestMatchers("/api/kanban/**").hasAnyRole(FREE.name(), PREMIUM.name())
+                        .requestMatchers("/api/comment/**").hasAnyRole(FREE.name(), PREMIUM.name())
+                        .requestMatchers("/api").hasRole(ADMIN.name())
+                        .anyRequest().authenticated()
 
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,6 +61,7 @@ public class SecurityConfig {
         ;
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

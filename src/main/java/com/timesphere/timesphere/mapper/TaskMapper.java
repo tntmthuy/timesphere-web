@@ -1,13 +1,23 @@
 package com.timesphere.timesphere.mapper;
 
-import com.timesphere.timesphere.dto.kanban.SubtaskDTO;
-import com.timesphere.timesphere.dto.kanban.TaskResponseDTO;
+import com.timesphere.timesphere.dto.subtask.SubtaskDTO;
+import com.timesphere.timesphere.dto.task.TaskResponseDTO;
 import com.timesphere.timesphere.entity.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class TaskMapper {
+
+    public static SubtaskDTO toSubtaskDto(Task task) {
+        return SubtaskDTO.builder()
+                .id(task.getId())
+                .title(task.getTaskTitle())
+                .isComplete(Boolean.TRUE.equals(task.getIsComplete()))
+                .subtaskPosition(task.getSubtaskPosition())
+                .build();
+    }
 
     public static TaskResponseDTO toDto(Task task) {
         List<SubtaskDTO> subtaskDtos = Optional.ofNullable(task.getSubTasks())
@@ -16,15 +26,21 @@ public class TaskMapper {
                 .map(sub -> SubtaskDTO.builder()
                         .id(sub.getId())
                         .title(sub.getTaskTitle())
-                        .isComplete(sub.getIsComplete())
+                        .isComplete(Boolean.TRUE.equals(sub.getIsComplete()))
                         .subtaskPosition(sub.getSubtaskPosition())
                         .build())
                 .toList();
 
-        double progress = 0;
+        double progress = 0.0;
+        String progressDisplay = "0/0";
+
         if (!subtaskDtos.isEmpty()) {
-            long done = subtaskDtos.stream().filter(SubtaskDTO::getIsComplete).count();
-            progress = (double) done / subtaskDtos.size();
+            long done = subtaskDtos.stream()
+                    .filter(s -> Boolean.TRUE.equals(s.getIsComplete()))
+                    .count();
+
+            progress = Math.round((double) done / subtaskDtos.size() * 100.0) / 100.0;
+            progressDisplay = done + "/" + subtaskDtos.size();
         }
 
         return TaskResponseDTO.builder()
@@ -36,9 +52,14 @@ public class TaskMapper {
                 .dateDue(task.getDateDue())
                 .subTasks(subtaskDtos)
                 .progress(progress)
-                .assignees(task.getAssignees().stream()
+                .progressDisplay(progressDisplay)
+                .assignees(Optional.ofNullable(task.getAssignees())
+                        .orElse(new ArrayList<>())
+                        .stream()
                         .map(TaskAssigneeMapper::toDto)
                         .toList())
                 .build();
     }
+
+
 }

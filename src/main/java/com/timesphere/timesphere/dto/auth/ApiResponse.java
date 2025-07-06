@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.dto.response;
+package com.timesphere.timesphere.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
