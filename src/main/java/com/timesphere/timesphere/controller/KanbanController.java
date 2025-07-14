@@ -155,36 +155,58 @@ public class KanbanController {
     // Tạo sub
     @PostMapping("/task/subtask")
     @PreAuthorize("hasAuthority('user:manage_board')")
-    public ResponseEntity<?> createSubtask(@RequestBody CreateSubtaskRequest req) {
-        Task sub = taskService.createSubtask(req);
+    public ResponseEntity<?> createSubtask(
+            @RequestBody CreateSubtaskRequest req,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        Task sub = taskService.createSubtask(req, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Tạo subtask thành công!", TaskMapper.toSubtaskDto(sub)));
     }
 
-    // đánh dấu sub
+    // ✅ Đánh dấu trạng thái hoàn thành
     @PutMapping("/task/subtask/{id}/toggle-complete")
-    public ResponseEntity<?> toggleSubtask(@PathVariable String id) {
-        taskService.toggleSubtaskStatus(id);
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> toggleSubtask(
+            @PathVariable String id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        taskService.toggleSubtaskStatus(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái subtask thành công!"));
     }
 
-    // dời subtask
+    // 🔀 Dời vị trí subtask
     @PutMapping("/task/{parentId}/subtasks/reorder")
-    public ResponseEntity<?> reorderSubtask(@PathVariable String parentId, @RequestBody ReorderSubtaskRequest req) {
-        taskService.reorderSubtask(parentId, req.getSubtaskId(), req.getTargetPosition());
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> reorderSubtask(
+            @PathVariable String parentId,
+            @RequestBody ReorderSubtaskRequest req,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        taskService.reorderSubtask(parentId, req.getSubtaskId(), req.getTargetPosition(), currentUser);
         return ResponseEntity.ok(ApiResponse.success("Sắp xếp lại subtask thành công!"));
     }
 
-    // cập nhật nội dung
+    // 📝 Cập nhật nội dung subtask
     @PatchMapping("/task/subtask/{id}")
-    public ResponseEntity<?> updateSubtask(@PathVariable String id,@Valid @RequestBody UpdateSubtaskRequest req) {
-        taskService.updateSubtaskTitle(id, req.getTitle());
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> updateSubtask(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateSubtaskRequest req,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        taskService.updateSubtaskTitle(id, req.getTitle(), currentUser);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật nội dung subtask thành công!"));
     }
 
-    // xóa subtask
+    // ❌ Xóa subtask
     @DeleteMapping("/task/subtask/{id}")
-    public ResponseEntity<?> deleteSubtask(@Valid @PathVariable String id) {
-        taskService.deleteSubtask(id);
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> deleteSubtask(
+            @PathVariable String id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        taskService.deleteSubtask(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Xoá subtask thành công!"));
     }
+
 }

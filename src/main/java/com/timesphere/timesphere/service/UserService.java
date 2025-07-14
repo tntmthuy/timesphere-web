@@ -3,12 +3,14 @@ package com.timesphere.timesphere.service;
 import com.timesphere.timesphere.dao.SearchRequest;
 import com.timesphere.timesphere.dao.UserSearchDao;
 import com.timesphere.timesphere.dto.auth.ChangePasswordRequest;
+import com.timesphere.timesphere.dto.user.UpdateProfileRequest;
 import com.timesphere.timesphere.dto.user.UserSuggestionResponse;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.exception.UserNotFoundException;
 import com.timesphere.timesphere.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,5 +85,25 @@ public class UserService {
                         u.getAvatarUrl()
                 ))
                 .toList();
+    }
+
+    //cập nhật profile
+    @Transactional
+    public User updateProfile(User currentUser, UpdateProfileRequest req) {
+        Optional.ofNullable(req.getFirstname()).ifPresent(currentUser::setFirstname);
+        Optional.ofNullable(req.getLastname()).ifPresent(currentUser::setLastname);
+        Optional.ofNullable(req.getGender()).ifPresent(currentUser::setGender);
+
+        return userRepository.save(currentUser);
+    }
+
+    // cập nhật avatar
+    @Transactional
+    public User changeAvatar(User user, String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            throw new AppException(ErrorCode.INVALID_KEY, "URL avatar không hợp lệ");
+        }
+        user.setAvatarUrl(avatarUrl);
+        return userRepository.save(user);
     }
 }

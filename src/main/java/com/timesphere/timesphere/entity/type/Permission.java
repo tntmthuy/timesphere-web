@@ -12,8 +12,9 @@ public enum Permission {
 
     TEAM_WORKSPACE("user:manage_team"),
 
-    KANBAN_BOARD("user:manage_board")
+    KANBAN_BOARD("user:manage_board"),
 
+    PROFILE_USER("user:manage_profile")
     ;
 
     private final String permission;

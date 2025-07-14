@@ -18,13 +18,15 @@ public enum Role {
 
                     FREE_POST_COMMENT,
                     TEAM_WORKSPACE,
-                    KANBAN_BOARD
+                    KANBAN_BOARD,
+                    PROFILE_USER
             )
     ),
     PREMIUM(
             Set.of(
                     TEAM_WORKSPACE,
-                    KANBAN_BOARD
+                    KANBAN_BOARD,
+                    PROFILE_USER
             )
     ),
     ADMIN(
@@ -33,7 +35,9 @@ public enum Role {
 
                     TEAM_WORKSPACE,
 
-                    KANBAN_BOARD
+                    KANBAN_BOARD,
+
+                    PROFILE_USER
             )
     );
 

@@ -29,6 +29,16 @@ public class TaskService {
     private final KanbanColumnRepository columnRepo;
     private final TeamMemberRepository memberRepo;
 
+    public boolean canModifyTask(Task task, User user) {
+        TeamWorkspace team = task.getColumn().getTeam();
+
+        boolean isOwner = memberRepo.existsByTeamAndUserAndTeamRole(team, user, TeamRole.OWNER);
+        boolean isAssigned = task.getAssignees().stream()
+                .anyMatch(m -> m.getUser().getId().equals(user.getId()));
+
+        return isOwner || isAssigned;
+    }
+
     // 🛒TASK
 
     // gán task
@@ -57,7 +67,7 @@ public class TaskService {
         return TaskMapper.toDto(updated);
     }
 
-
+    // tạo task
     @Transactional
     public Task createTask(CreateTaskRequest req, User currentUser) {
         KanbanColumn column = columnRepo.findById(req.getColumnId())
@@ -94,18 +104,14 @@ public class TaskService {
 
         TeamWorkspace team = task.getColumn().getTeam();
 
-        boolean isOwner = memberRepo.existsByTeamAndUserAndTeamRole(team, requester, TeamRole.OWNER);
-        boolean isAssignee = task.getAssignees().stream()
-                .anyMatch(m -> m.getUser().getId().equals(requester.getId()));
-
-        if (!isOwner && !isAssignee) {
+        if (!canModifyTask(task, requester)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         if (req.getTitle() != null) task.setTaskTitle(req.getTitle());
         if (req.getDescription() != null) task.setDescription(req.getDescription());
-        if (req.getDateDue() != null) task.setDateDue(req.getDateDue());
-        if (req.getPriority() != null) task.setPriority(req.getPriority());
+        task.setDateDue(req.getDateDue());
+        task.setPriority(req.getPriority());
 
         Task updated = taskRepo.save(task);
         return TaskMapper.toDto(updated);
@@ -139,38 +145,25 @@ public class TaskService {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
-        KanbanColumn currentColumn = task.getColumn();
-        TeamWorkspace team = currentColumn.getTeam();
-
-        // ✅ Kiểm tra quyền thao tác
-        boolean isOwner = memberRepo.existsByTeamAndUserAndTeamRole(team, currentUser, TeamRole.OWNER);
-        boolean isAssigned = task.getAssignees().stream()
-                .anyMatch(m -> m.getUser().getId().equals(currentUser.getId()));
-
-        if (!isOwner && !isAssigned) {
+        if (!canModifyTask(task, currentUser)) {
             throw new AppException(ErrorCode.UNAUTHORIZED); // Không có quyền thao tác task
         }
 
-        // ✅ Lấy column đích
         KanbanColumn targetColumn = columnRepo.findById(targetColumnId)
                 .orElseThrow(() -> new AppException(ErrorCode.COLUMN_NOT_FOUND));
 
-        // ✅ Lấy danh sách task hiện tại trong column đích
         List<Task> tasks = taskRepo.findByColumnIdOrderByPosition(targetColumnId);
-
-        // ✅ Xoá task khỏi danh sách nếu đã nằm trong column này (tránh lỗi insert)
         tasks.removeIf(t -> t.getId().equals(taskId));
 
-        // ✅ Thêm vào vị trí mới
-        if (targetPosition > tasks.size()) {
-            targetPosition = tasks.size(); // giới hạn index
-        }
+        // ✅ Giới hạn vị trí nếu target vượt quá
+        targetPosition = Math.min(targetPosition, tasks.size());
         tasks.add(targetPosition, task);
 
-        // ✅ Cập nhật lại vị trí cho từng task
+        // ✅ Cập nhật lại position và column
         for (int i = 0; i < tasks.size(); i++) {
-            tasks.get(i).setPosition(i);
-            tasks.get(i).setColumn(targetColumn);
+            Task t = tasks.get(i);
+            t.setPosition(i);
+            t.setColumn(targetColumn);
         }
 
         taskRepo.saveAll(tasks);
@@ -182,12 +175,16 @@ public class TaskService {
     // 📮SUBTASK
     // tạo subtask
     @Transactional
-    public Task createSubtask(CreateSubtaskRequest req) {
+    public Task createSubtask(CreateSubtaskRequest req, User currentUser) {
         Task parent = taskRepo.findById(req.getParentTaskId())
                 .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
-        int nextPosition = taskRepo.findMaxSubtaskPositionByParentId(req.getParentTaskId())
-                .orElse(-1) + 1;
+        if (!canModifyTask(parent, currentUser)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        int nextPosition = taskRepo.findMaxSubtaskPositionByParentId(req.getParentTaskId()).orElse(-1) + 1;
+
         Task sub = Task.builder()
                 .taskTitle(req.getTitle())
                 .isComplete(false)
@@ -200,13 +197,16 @@ public class TaskService {
 
     // đánh dấu subtask
     @Transactional
-    public void toggleSubtaskStatus(String subtaskId) {
+    public void toggleSubtaskStatus(String subtaskId, User currentUser) {
         Task sub = taskRepo.findById(subtaskId)
                 .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
-        if (sub.getParentTask() == null) {
+        Task parent = sub.getParentTask();
+        if (parent == null)
             throw new AppException(ErrorCode.SUBTASK_INVALID_PARENT);
-        }
+
+        if (!canModifyTask(parent, currentUser))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
 
         sub.setIsComplete(!Boolean.TRUE.equals(sub.getIsComplete()));
         taskRepo.save(sub);
@@ -214,16 +214,21 @@ public class TaskService {
 
     // dời subtask
     @Transactional
-    public void reorderSubtask(String parentId, String subtaskId, int targetPosition) {
-        List<Task> subtasks = taskRepo.findByParentTaskIdOrderBySubtaskPosition(parentId);
+    public void reorderSubtask(String parentId, String subtaskId, int targetPosition, User currentUser) {
+        Task parent = taskRepo.findById(parentId)
+                .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
+        if (!canModifyTask(parent, currentUser))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+
+        List<Task> subtasks = taskRepo.findByParentTaskIdOrderBySubtaskPosition(parentId);
         Task moving = subtasks.stream()
                 .filter(s -> s.getId().equals(subtaskId))
                 .findFirst()
                 .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
         subtasks.remove(moving);
-        subtasks.add(targetPosition, moving);
+        subtasks.add(Math.min(targetPosition, subtasks.size()), moving);
 
         for (int i = 0; i < subtasks.size(); i++) {
             subtasks.get(i).setSubtaskPosition(i);
@@ -234,32 +239,37 @@ public class TaskService {
 
     // cập nhật nôi dung subtask
     @Transactional
-    public void updateSubtaskTitle(String subtaskId, String newTitle) {
+    public void updateSubtaskTitle(String subtaskId, String newTitle, User currentUser) {
         Task sub = taskRepo.findById(subtaskId)
                 .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
-        if (sub.getParentTask() == null)
+        Task parent = sub.getParentTask();
+        if (parent == null)
             throw new AppException(ErrorCode.SUBTASK_INVALID_PARENT);
+
+        if (!canModifyTask(parent, currentUser))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+
         sub.setTaskTitle(newTitle);
         taskRepo.save(sub);
     }
 
     // xóa subtask
     @Transactional
-    public void deleteSubtask(String subtaskId) {
+    public void deleteSubtask(String subtaskId, User currentUser) {
         Task sub = taskRepo.findById(subtaskId)
                 .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
 
-        if (sub.getParentTask() == null)
+        Task parent = sub.getParentTask();
+        if (parent == null)
             throw new AppException(ErrorCode.SUBTASK_INVALID_PARENT);
 
-        // Bước 1: xoá trước
+        if (!canModifyTask(parent, currentUser))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+
         taskRepo.delete(sub);
 
-        // Bước 2: lấy danh sách subtask còn lại
-        List<Task> remaining = taskRepo.findByParentTaskIdOrderBySubtaskPosition(sub.getParentTask().getId());
-
-        // Bước 3: cập nhật lại subtaskPosition
+        List<Task> remaining = taskRepo.findByParentTaskIdOrderBySubtaskPosition(parent.getId());
         for (int i = 0; i < remaining.size(); i++) {
             remaining.get(i).setSubtaskPosition(i);
         }

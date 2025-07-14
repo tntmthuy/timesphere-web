@@ -1,6 +1,7 @@
 package com.timesphere.timesphere.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.timesphere.timesphere.entity.type.Gender;
 import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.type.UserStatus;
 import jakarta.persistence.*;
@@ -35,7 +36,11 @@ public class User extends BaseEntity implements UserDetails {
 
     private String firstname;
     private String lastname;
-    private String gender;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender;
+
     private String avatarUrl;
 
     //xác thực 2 yếu tố

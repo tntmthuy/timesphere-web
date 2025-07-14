@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,5 +32,8 @@ public class TeamMember extends BaseEntity {
     @Column(name = "team_role")
     @Enumerated(EnumType.STRING)
     private TeamRole teamRole; // OWNER, MEMBER...
+
+    @ManyToMany(mappedBy = "assignees")
+    private List<Task> assignedTasks = new ArrayList<>();
 
 }

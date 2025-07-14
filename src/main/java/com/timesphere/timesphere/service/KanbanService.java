@@ -69,7 +69,17 @@ public class KanbanService {
                 .orElseThrow(() -> new AppException(ErrorCode.COLUMN_NOT_FOUND));
 
         TeamWorkspace team = column.getTeam();
+
+        System.out.println("🧩 PATCH Column ID: " + columnId);
+        System.out.println("🧠 Tiêu đề hiện tại: " + column.getTitle());
+        System.out.println("🎯 Sẽ đổi thành: " + newTitle);
+        System.out.println("🏢 Team ID: " + team.getId());
+        System.out.println("🙋 Requester ID: " + requester.getId());
+        System.out.println("🙋 Email: " + requester.getEmail());
+
         boolean isOwner = memberRepo.existsByTeamAndUserAndTeamRole(team, requester, TeamRole.OWNER);
+
+        System.out.println("🛡 isOwner: " + isOwner);
 
         if (!isOwner) {
             throw new AppException(ErrorCode.UNAUTHORIZED);

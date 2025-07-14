@@ -24,9 +24,13 @@ public class Task extends BaseEntity{
 
     private String taskTitle;
     private String description;
+
+    @Column(nullable = true)
     private LocalDateTime dateDue;
+
     private Integer reminderTime;
 
+    @Column(nullable = true)
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
