@@ -127,6 +127,18 @@ public class TeamController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật vai trò thành công!", updatedTeam));
     }
 
+    // Tìm kiếm thanh viên trong team
+    @GetMapping("/{teamId}/members/search")
+    @PreAuthorize("hasAuthority('user:manage_team')")
+    public ResponseEntity<?> searchTeamMembers(
+            @PathVariable String teamId,
+            @RequestParam(required = false) String keyword,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        String safeKeyword = keyword == null ? "" : keyword.trim();
+        var result = teamMemberService.searchMembersInTeam(teamId, safeKeyword, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Gợi ý thành viên phù hợp", result));
+    }
 
     //Member
     // Lấy danh sách thành viên nhóm với các thong tin cơ bản
@@ -141,16 +153,5 @@ public class TeamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách thành viên thành công!", members));
     }
 
-    // Tìm kiếm thanh viên trong team
-    @GetMapping("/{teamId}/members/search")
-    @PreAuthorize("hasAuthority('user:manage_team')")
-    public ResponseEntity<?> searchTeamMembers(
-            @PathVariable String teamId,
-            @RequestParam(required = false) String keyword,
-            @AuthenticationPrincipal User currentUser
-    ) {
-        String safeKeyword = keyword == null ? "" : keyword.trim();
-        var result = teamMemberService.searchMembersInTeam(teamId, safeKeyword, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("Gợi ý thành viên phù hợp", result));
-    }
+
 }

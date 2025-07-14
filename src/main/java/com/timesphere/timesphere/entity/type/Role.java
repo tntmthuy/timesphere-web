@@ -15,29 +15,27 @@ import static com.timesphere.timesphere.entity.type.Permission.*;
 public enum Role {
     FREE(
             Set.of(
-
-                    FREE_POST_COMMENT,
                     TEAM_WORKSPACE,
                     KANBAN_BOARD,
-                    PROFILE_USER
+                    PROFILE_USER,
+                    TASK_COMMENT
             )
     ),
     PREMIUM(
             Set.of(
                     TEAM_WORKSPACE,
                     KANBAN_BOARD,
-                    PROFILE_USER
+                    PROFILE_USER,
+                    TASK_COMMENT
             )
     ),
     ADMIN(
             Set.of(
                     ADMIN_READ_ALL_USERS,
-
                     TEAM_WORKSPACE,
-
                     KANBAN_BOARD,
-
-                    PROFILE_USER
+                    PROFILE_USER,
+                    TASK_COMMENT
             )
     );
 

@@ -3,6 +3,7 @@ package com.timesphere.timesphere.controller;
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.kanban.*;
 import com.timesphere.timesphere.dto.member.AssignTaskRequest;
+import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.subtask.CreateSubtaskRequest;
 import com.timesphere.timesphere.dto.subtask.ReorderSubtaskRequest;
 import com.timesphere.timesphere.dto.subtask.UpdateSubtaskRequest;
@@ -23,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -107,6 +110,19 @@ public class KanbanController {
     ) {
         TaskResponseDTO updated = taskService.assignMembers(taskId, req.getMemberIds(), currentUser);
         return ResponseEntity.ok(ApiResponse.success("Gán thành viên vào task thành công!", updated));
+    }
+
+    //list assignees
+    @GetMapping("/task/{taskId}/assignees")
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> getTaskAssignees(
+            @PathVariable String taskId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        List<TeamMemberDTO> assignees = taskService.getAssigneesOfTask(taskId, currentUser);
+        return ResponseEntity.ok(
+                ApiResponse.success("Lấy danh sách thành viên được giao thành công!", assignees)
+        );
     }
 
     // cập nhật task

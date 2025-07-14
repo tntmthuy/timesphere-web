@@ -26,21 +26,21 @@ public class TaskCommentController {
     private final TaskCommentService commentService;
 
     @PostMapping("/task")
-    @PreAuthorize("hasAuthority('user:manage_board')")
+    @PreAuthorize("hasAuthority('user:task_comment')")
     public ResponseEntity<ApiResponse<TaskCommentDTO>> createComment(@Valid @RequestBody CreateCommentRequest req) {
         TaskCommentDTO result = commentService.createComment(req);
         return ResponseEntity.ok(ApiResponse.success("Gửi bình luận thành công!", result));
     }
 
     @GetMapping("/task/{taskId}")
-    @PreAuthorize("hasAuthority('user:manage_board')")
+    @PreAuthorize("hasAuthority('user:task_comment')")
     public ResponseEntity<ApiResponse<List<TaskCommentDTO>>> getCommentsByTask(@PathVariable String taskId) {
         List<TaskCommentDTO> result = commentService.getCommentsByTask(taskId);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bình luận thành công!", result));
     }
 
     @PutMapping("/{commentId}")
-    @PreAuthorize("hasAuthority('user:manage_board')")
+    @PreAuthorize("hasAuthority('user:task_comment')")
     public ResponseEntity<ApiResponse<TaskCommentDTO>> updateComment(
             @PathVariable String commentId,
             @RequestPart("data") UpdateCommentRequest request,
@@ -58,7 +58,7 @@ public class TaskCommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    @PreAuthorize("hasAuthority('user:manage_board')")
+    @PreAuthorize("hasAuthority('user:task_comment')")
     public ResponseEntity<?> deleteComment(
             @PathVariable String commentId,
             @AuthenticationPrincipal User currentUser

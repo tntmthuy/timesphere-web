@@ -4,6 +4,7 @@ import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.entity.TeamMember;
 import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.entity.type.TeamRole;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.repository.TeamMemberRepository;
@@ -48,7 +49,14 @@ public class TeamMemberService {
         TeamWorkspace team = teamRepo.findById(teamId)
                 .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
 
-        verifyUserIsMember(team, requester); // nếu cần bảo vệ
+        // ✅ Kiểm tra requester có phải thành viên
+        TeamMember requesterMember = memberRepo.findByTeamAndUser(team, requester)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+
+        // ✅ Chỉ OWNER được phép tìm kiếm
+        if (!TeamRole.OWNER.equals(requesterMember.getTeamRole())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Chỉ nhóm trưởng (OWNER) mới được thực hiện thao tác này.");
+        }
 
         List<TeamMember> members = memberRepo.findAllByTeam(team);
 
@@ -58,12 +66,14 @@ public class TeamMemberService {
                     return name.toLowerCase().contains(keyword.toLowerCase())
                             || m.getUser().getEmail().toLowerCase().contains(keyword.toLowerCase());
                 })
-                .map(member -> new TeamMemberDTO(
-                        member.getUser().getId(),
-                        member.getUser().getFirstname() + " " + member.getUser().getLastname(),
-                        member.getUser().getEmail(),
-                        member.getUser().getAvatarUrl()
-                ))
+                .map(member -> TeamMemberDTO.builder()
+                        .memberId(member.getId()) // 👈 bổ sung
+                        .userId(member.getUser().getId())
+                        .teamId(member.getTeam().getId())
+                        .fullName(member.getUser().getFirstname() + " " + member.getUser().getLastname())
+                        .email(member.getUser().getEmail())
+                        .avatarUrl(member.getUser().getAvatarUrl())
+                        .build())
                 .toList();
     }
 }

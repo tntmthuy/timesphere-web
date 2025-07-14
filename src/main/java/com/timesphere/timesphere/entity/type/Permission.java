@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Permission {
-    FREE_POST_COMMENT("user_free:post_comment"),
+    TASK_COMMENT("user:task_comment"),
 
     ADMIN_READ_ALL_USERS("admin:read_all_users"),
 

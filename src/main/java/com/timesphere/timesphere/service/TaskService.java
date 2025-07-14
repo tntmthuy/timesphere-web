@@ -1,6 +1,7 @@
 package com.timesphere.timesphere.service;
 
 
+import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.subtask.CreateSubtaskRequest;
 import com.timesphere.timesphere.dto.task.CreateTaskRequest;
 import com.timesphere.timesphere.dto.task.TaskResponseDTO;
@@ -60,11 +61,33 @@ public class TaskService {
                 .filter(m -> m.getTeam().getId().equals(team.getId()))
                 .toList();
 
-        task.getAssignees().clear();              // 👈 Fix lỗi ImmutableList
-        task.getAssignees().addAll(membersToAssign);
+        membersToAssign.forEach(task.getAssignees()::add);
 
         Task updated = taskRepo.save(task);
         return TaskMapper.toDto(updated);
+    }
+
+    // danh sách asignees từng task
+    public List<TeamMemberDTO> getAssigneesOfTask(String taskId, User requester) {
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
+
+        TeamWorkspace team = task.getColumn().getTeam();
+
+        if (!memberRepo.existsByTeamAndUser(team, requester)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return task.getAssignees().stream()
+                .map(member -> TeamMemberDTO.builder()
+                        .memberId(member.getId()) // 👈 thêm dòng này
+                        .userId(member.getUser().getId())
+                        .teamId(member.getTeam().getId())
+                        .fullName(member.getUser().getFullName())
+                        .email(member.getUser().getEmail())
+                        .avatarUrl(member.getUser().getAvatarUrl())
+                        .build())
+                .toList();
     }
 
     // tạo task
