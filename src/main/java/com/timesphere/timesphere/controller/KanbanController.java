@@ -112,6 +112,18 @@ public class KanbanController {
         return ResponseEntity.ok(ApiResponse.success("Gán thành viên vào task thành công!", updated));
     }
 
+    //unassign
+    @PutMapping("/task/{taskId}/unassign")
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> unassignTaskMembers(
+            @PathVariable String taskId,
+            @Valid @RequestBody AssignTaskRequest req,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        TaskResponseDTO updated = taskService.unassignMembers(taskId, req.getMemberIds(), currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Gỡ thành viên khỏi task thành công!", updated));
+    }
+
     //list assignees
     @GetMapping("/task/{taskId}/assignees")
     @PreAuthorize("hasAuthority('user:manage_board')")

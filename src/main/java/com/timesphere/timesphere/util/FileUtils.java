@@ -37,10 +37,11 @@ public class FileUtils {
 
         String ft = fileType.toLowerCase();
 
+        // ⚠️ Ưu tiên bắt PDF trước khi xét image
+        if (ft.contains("pdf")) return AttachmentType.PDF;
         if (ft.startsWith("image/")) return AttachmentType.IMAGE;
         if (ft.startsWith("video/")) return AttachmentType.VIDEO;
         if (ft.startsWith("audio/")) return AttachmentType.AUDIO;
-        if (ft.equals("application/pdf")) return AttachmentType.PDF;
         if (ft.contains("msword") || ft.contains("word")) return AttachmentType.DOC;
 
         return AttachmentType.FILE;

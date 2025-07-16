@@ -53,11 +53,6 @@ public class TeamMemberService {
         TeamMember requesterMember = memberRepo.findByTeamAndUser(team, requester)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
 
-        // ✅ Chỉ OWNER được phép tìm kiếm
-        if (!TeamRole.OWNER.equals(requesterMember.getTeamRole())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED, "Chỉ nhóm trưởng (OWNER) mới được thực hiện thao tác này.");
-        }
-
         List<TeamMember> members = memberRepo.findAllByTeam(team);
 
         return members.stream()

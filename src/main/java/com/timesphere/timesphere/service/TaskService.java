@@ -67,6 +67,32 @@ public class TaskService {
         return TaskMapper.toDto(updated);
     }
 
+    //bỏ gán task
+    @Transactional
+    public TaskResponseDTO unassignMembers(String taskId, List<String> memberIds, User currentUser) {
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
+
+        TeamWorkspace team = task.getColumn().getTeam();
+
+        boolean isOwner = memberRepo.existsByTeamAndUserAndTeamRole(team, currentUser, TeamRole.OWNER);
+        if (!isOwner) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Chỉ nhóm trưởng mới được gỡ thành viên khỏi task.");
+        }
+
+        List<TeamMember> membersToUnassign = memberIds.stream()
+                .map(id -> memberRepo.findById(Integer.parseInt(id))
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_TEAM)))
+                .filter(m -> m.getTeam().getId().equals(team.getId())) // ✅ đảm bảo cùng team
+                .toList();
+
+        // 👇 Gỡ thành viên khỏi task
+        task.getAssignees().removeAll(membersToUnassign);
+
+        Task updated = taskRepo.save(task);
+        return TaskMapper.toDto(updated);
+    }
+
     // danh sách asignees từng task
     public List<TeamMemberDTO> getAssigneesOfTask(String taskId, User requester) {
         Task task = taskRepo.findById(taskId)

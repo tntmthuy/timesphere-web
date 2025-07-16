@@ -27,6 +27,7 @@ public class Attachment {
     private String cloudId;      // Public ID bên Cloudinary để xoá nếu cần
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 10)
     private AttachmentType type; // IMAGE hoặc FILE (dựa theo fileType)
 
     @ManyToOne(fetch = FetchType.LAZY)
