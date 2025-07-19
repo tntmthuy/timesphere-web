@@ -16,7 +16,7 @@ public class MemberInvite {
     @Email(message = "EMAIL_INVALID")
     private String email;
 
-    @NotNull(message = "ROLE_REQUIRED")
+//    @NotNull(message = "ROLE_REQUIRED")
     private TeamRole role;
     // OWNER hoặc MEMBER
 }

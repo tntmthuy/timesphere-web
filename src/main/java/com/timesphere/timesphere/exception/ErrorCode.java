@@ -73,6 +73,8 @@ public enum ErrorCode {
     SUBTASK_TITLE_REQUIRED(4103, "Vui lòng nhập nội dung subtask.", BAD_REQUEST),
     INVALID_SUBTASK_POSITION(4104, "Vị trí subtask không hợp lệ.", BAD_REQUEST),
 
+    // === 500x: Notification ===
+    NOTIFICATION_NOT_FOUND(5001, "Không tìm thấy thông báo.", NOT_FOUND),
     ;
     private final int code;
     private final String message;

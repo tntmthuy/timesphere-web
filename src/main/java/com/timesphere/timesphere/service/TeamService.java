@@ -1,27 +1,24 @@
 package com.timesphere.timesphere.service;
 
+import com.timesphere.timesphere.dto.comment.AttachmentDTO;
 import com.timesphere.timesphere.dto.team.*;
 import com.timesphere.timesphere.entity.*;
+import com.timesphere.timesphere.entity.type.AttachmentType;
 import com.timesphere.timesphere.entity.type.InvitationStatus;
 import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.type.TeamRole;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
+import com.timesphere.timesphere.mapper.AttachmentMapper;
 import com.timesphere.timesphere.mapper.TeamMapper;
-import com.timesphere.timesphere.repository.TeamInvitationRepository;
-import com.timesphere.timesphere.repository.TeamMemberRepository;
-import com.timesphere.timesphere.repository.TeamRepository;
-import com.timesphere.timesphere.repository.UserRepository;
+import com.timesphere.timesphere.repository.*;
 import com.timesphere.timesphere.util.TimeUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +31,9 @@ public class TeamService {
 
     private final TeamInvitationService invitationService;
     private final TeamInvitationRepository invitationRepository;
+
+    private final AttachmentRepository attachmentRepository;
+    private final AttachmentMapper attachmentMapper;
 
     private void validateTeamMemberLimit(TeamWorkspace team, int incomingCount) {
         long currentCount = teamMemberRepository.countByTeam(team);
@@ -282,5 +282,11 @@ public class TeamService {
 
     public TeamWorkspace getTeamByIdOrThrow(String id) {
         return findTeamOrThrow(id);
+    }
+
+    //attachments
+    public List<AttachmentDTO> getAllAttachmentsInTeam(String teamId, AttachmentType typeFilter) {
+        List<Attachment> attachments = attachmentRepository.findByTeamId(teamId, typeFilter);
+        return attachments.stream().map(attachmentMapper::toDto).toList();
     }
 }

@@ -7,14 +7,12 @@ import com.timesphere.timesphere.entity.TeamMember;
 import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.entity.type.InvitationStatus;
+import com.timesphere.timesphere.entity.type.NotificationType;
 import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.type.TeamRole;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
-import com.timesphere.timesphere.repository.TeamInvitationRepository;
-import com.timesphere.timesphere.repository.TeamMemberRepository;
-import com.timesphere.timesphere.repository.TeamRepository;
-import com.timesphere.timesphere.repository.UserRepository;
+import com.timesphere.timesphere.repository.*;
 import com.timesphere.timesphere.util.TimeUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,8 @@ public class TeamInvitationService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
-
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepo;
 
     // Tìm người dùng chưa trong team để mời vào team
     public List<UserSuggestionResponse> searchUsersForInvitation(String keyword, String teamId) {
@@ -93,8 +92,18 @@ public class TeamInvitationService {
                 .invitedRole(role)
                 .status(InvitationStatus.PENDING)
                 .build());
-
         log.info("📨 Gửi lại lời mời tới {} từ team {} với vai trò {}", invitedUser.getEmail(), team.getTeamName(), role);
+
+        // ✅ Gửi thông báo kèm theo
+        notificationService.notify(
+                invitedUser,
+                inviter,
+                inviter.getFullName() + " đã mời bạn tham gia nhóm",
+                "Nhóm: " + team.getTeamName(),
+                "/mainpage/notification",
+                NotificationType.INVITE,
+                team.getId()
+        );
     }
 
     public List<InvitationResponse> getPendingInvitations(User user) {
@@ -129,6 +138,9 @@ public class TeamInvitationService {
             throw new AppException(ErrorCode.TEAM_LIMIT_REACHED_FOR_FREE_USER);
         }
 
+        log.info("👉 Đang tìm lời mời cho user={} và team={}", user.getId(), teamId);
+
+        // 👉 Lưu người vừa tham gia team
         TeamMember member = TeamMember.builder()
                 .team(team)
                 .user(user)
@@ -136,8 +148,27 @@ public class TeamInvitationService {
                 .build();
         teamMemberRepository.save(member);
 
+        // 👉 Cập nhật trạng thái lời mời
         invite.setStatus(InvitationStatus.ACCEPTED);
+        notificationRepo.markAsReadByUserAndTeam(user.getId(), team.getId(), NotificationType.INVITE);
         invitationRepository.save(invite);
+
+        // ✅ Gửi thông báo đến những người còn lại
+        List<TeamMember> others = teamMemberRepository.findAllByTeam(team).stream()
+                .filter(tm -> !tm.getUser().getId().equals(user.getId()))
+                .toList();
+
+        for (TeamMember tm : others) {
+            notificationService.notify(
+                    tm.getUser(),
+                    user,
+                    user.getFullName() + " has just joined the team!",
+                    "Team: " + team.getTeamName(),
+                    "/mainpage/team/" + team.getId(),
+                    NotificationType.JOIN_TEAM,
+                    team.getId()
+            );
+        }
 
         log.info("✅ Người dùng {} đã chấp nhận lời mời vào team {}", user.getEmail(), team.getTeamName());
     }
@@ -153,8 +184,9 @@ public class TeamInvitationService {
         if (!invite.getStatus().equals(InvitationStatus.PENDING)) {
             throw new AppException(ErrorCode.INVITATION_NOT_FOUND);
         }
-
+        log.info("👉 Đang tìm lời mời cho user={} và team={}", user.getId(), teamId);
         invite.setStatus(InvitationStatus.DECLINED);
+        notificationRepo.markAsReadByUserAndTeam(user.getId(), team.getId(), NotificationType.INVITE);
         invitationRepository.save(invite);
 
         log.info("🚫 Người dùng {} đã từ chối lời mời vào team {}", user.getEmail(), team.getTeamName());

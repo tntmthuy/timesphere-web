@@ -40,17 +40,16 @@ public class TaskCommentService {
     private final CloudinaryService cloudinaryService;
     private final AttachmentRepository attachmentRepo;
 
-    @Transactional
-    public void deleteComment(String commentId, User currentUser) {
+    public String deleteComment(String commentId, User currentUser) {
         TaskComment comment = taskCommentRepo.findById(commentId)
                 .orElseThrow(() -> new AppException(COMMENT_NOT_FOUND));
 
-        // Chỉ cho phép chủ comment xoá
         if (!comment.getCreatedBy().getId().equals(currentUser.getId())) {
             throw new AppException(UNAUTHORIZED);
         }
 
-        // 1. Xử lý xoá file trên Cloudinary nếu có đính kèm
+        String teamId = comment.getTask().getColumn().getTeam().getId();
+
         List<Attachment> attachments = comment.getAttachments();
         if (attachments != null && !attachments.isEmpty()) {
             for (Attachment file : attachments) {
@@ -60,15 +59,13 @@ public class TaskCommentService {
                         cloudinaryService.deleteFile(cloudId);
                     } catch (Exception ex) {
                         log.warn("❗Không thể xoá file trên Cloudinary: {}", cloudId, ex);
-                        // Optional: throw new AppException(FILE_DELETE_FAILED)
                     }
                 }
             }
         }
-        log.info("🗑 {} xoá bình luận {} có {} file đính kèm",
-                currentUser.getEmail(), commentId, attachments.size());
-        // 2. Xoá luôn comment (Cascade sẽ xoá attachments nếu config đúng)
+
         taskCommentRepo.delete(comment);
+        return teamId;
     }
 
     @Transactional

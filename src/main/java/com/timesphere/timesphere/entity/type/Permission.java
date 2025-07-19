@@ -14,7 +14,9 @@ public enum Permission {
 
     KANBAN_BOARD("user:manage_board"),
 
-    PROFILE_USER("user:manage_profile")
+    PROFILE_USER("user:manage_profile"),
+
+    NOTIFICATION_USER("user:read_notification")
     ;
 
     private final String permission;

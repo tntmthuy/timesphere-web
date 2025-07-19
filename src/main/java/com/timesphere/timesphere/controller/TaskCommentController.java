@@ -1,11 +1,13 @@
 package com.timesphere.timesphere.controller;
 
 import com.timesphere.timesphere.dto.auth.ApiResponse;
+import com.timesphere.timesphere.dto.comment.AttachmentDTO;
 import com.timesphere.timesphere.dto.comment.CreateCommentRequest;
 import com.timesphere.timesphere.dto.comment.UpdateCommentRequest;
 import com.timesphere.timesphere.dto.task.TaskCommentDTO;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.service.TaskCommentService;
+import com.timesphere.timesphere.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import java.util.List;
 public class TaskCommentController {
 
     private final TaskCommentService commentService;
+    private final TeamService teamService;
 
     @PostMapping("/task")
     @PreAuthorize("hasAuthority('user:task_comment')")
@@ -63,7 +66,15 @@ public class TaskCommentController {
             @PathVariable String commentId,
             @AuthenticationPrincipal User currentUser
     ) {
-        commentService.deleteComment(commentId, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("Đã xoá bình luận thành công!"));
+        // B1: Xoá bình luận và trả về teamId
+        String teamId = commentService.deleteComment(commentId, currentUser);
+
+        // B2: Gọi lại danh sách file đính kèm còn lại của team
+        List<AttachmentDTO> remainingFiles = teamService.getAllAttachmentsInTeam(teamId, null);
+
+        // B3: Trả về phản hồi có code + message + data
+        return ResponseEntity.ok(
+                ApiResponse.success("Đã xoá bình luận thành công!", remainingFiles)
+        );
     }
 }

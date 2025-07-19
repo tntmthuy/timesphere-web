@@ -1,10 +1,12 @@
 package com.timesphere.timesphere.controller;
 
 import com.timesphere.timesphere.dto.auth.ApiResponse;
+import com.timesphere.timesphere.dto.comment.AttachmentDTO;
 import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.team.*;
 import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.entity.type.AttachmentType;
 import com.timesphere.timesphere.service.TeamMemberService;
 import com.timesphere.timesphere.service.TeamService;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/teams")
@@ -153,5 +156,14 @@ public class TeamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách thành viên thành công!", members));
     }
 
-
+    //all attachments of team
+    @GetMapping("/{teamId}/attachments")
+    @PreAuthorize("hasAuthority('user:manage_team')")
+    public ResponseEntity<List<AttachmentDTO>> getAttachmentsByTeam(
+            @PathVariable String teamId,
+            @RequestParam(required = false) AttachmentType type
+    ) {
+        List<AttachmentDTO> files = teamService.getAllAttachmentsInTeam(teamId, type);
+        return ResponseEntity.ok(files);
+    }
 }

@@ -17,8 +17,9 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String message;         // Nội dung chính hiển thị
-    private Boolean isRead;         // Đã đọc hay chưa
+    private String title;       // "Bạn được gán vào task ABC"
+    private String content;     // "Deadline: 20/07/2025"
+    private boolean isRead = false;
     private String targetUrl;       // FE biết chuyển hướng đến đâu
 
     @Enumerated(EnumType.STRING)
@@ -29,4 +30,7 @@ public class Notification extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User sender;            // Người tạo ra sự kiện
+
+    @Column(name = "reference_id")
+    private String referenceId; // dùng để lưu teamId hoặc taskId tùy loại
 }

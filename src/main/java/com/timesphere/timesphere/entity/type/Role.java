@@ -18,7 +18,8 @@ public enum Role {
                     TEAM_WORKSPACE,
                     KANBAN_BOARD,
                     PROFILE_USER,
-                    TASK_COMMENT
+                    TASK_COMMENT,
+                    NOTIFICATION_USER
             )
     ),
     PREMIUM(
@@ -26,7 +27,8 @@ public enum Role {
                     TEAM_WORKSPACE,
                     KANBAN_BOARD,
                     PROFILE_USER,
-                    TASK_COMMENT
+                    TASK_COMMENT,
+                    NOTIFICATION_USER
             )
     ),
     ADMIN(
@@ -35,7 +37,8 @@ public enum Role {
                     TEAM_WORKSPACE,
                     KANBAN_BOARD,
                     PROFILE_USER,
-                    TASK_COMMENT
+                    TASK_COMMENT,
+                    NOTIFICATION_USER // chưa rõ có viết riêng không
             )
     );
 

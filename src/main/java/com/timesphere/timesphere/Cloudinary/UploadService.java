@@ -1,9 +1,7 @@
-package com.timesphere.timesphere.service;
+package com.timesphere.timesphere.Cloudinary;
 
-import com.timesphere.timesphere.Cloudinary.CloudinaryService;
 import com.timesphere.timesphere.dto.comment.AttachmentDTO;
 import com.timesphere.timesphere.util.FileUtils;
-import com.timesphere.timesphere.Cloudinary.CloudinaryUploadResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
