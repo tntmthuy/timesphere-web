@@ -35,6 +35,9 @@ public class TeamService {
     private final AttachmentRepository attachmentRepository;
     private final AttachmentMapper attachmentMapper;
 
+    private final TaskRepository taskRepo;
+    private final TaskCommentRepository taskCommentRepo;
+
     private void validateTeamMemberLimit(TeamWorkspace team, int incomingCount) {
         long currentCount = teamMemberRepository.countByTeam(team);
         if (currentCount + incomingCount > 20) {
@@ -157,6 +160,7 @@ public class TeamService {
     }
 
     //kick khỏi nhóm
+    @Transactional
     public void removeMember(String teamId, String userId, User currentUser) {
         TeamWorkspace team = findTeamOrThrow(teamId);
         verifyIsOwner(team, currentUser);
@@ -171,6 +175,20 @@ public class TeamService {
         TeamMember member = teamMemberRepository.findByTeamAndUser(team, user)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_TEAM));
 
+        // ✅ Gỡ assign của member khỏi các task thuộc nhóm
+        List<Task> tasksInTeam = taskRepo.findByColumn_Team(team);
+        for (Task task : tasksInTeam) {
+            if (task.getAssignees().contains(member)) {
+                task.getAssignees().remove(member);
+                taskRepo.save(task);
+            }
+        }
+
+        // ✅ Xoá comment của user trong các task thuộc nhóm này
+        List<TaskComment> commentsInTeam = taskCommentRepo.findByTask_Column_TeamAndCreatedBy(team, user);
+        taskCommentRepo.deleteAll(commentsInTeam);
+
+        // ✅ Xoá bản ghi team member
         teamMemberRepository.delete(member);
     }
 

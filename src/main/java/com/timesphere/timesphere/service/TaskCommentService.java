@@ -4,11 +4,9 @@ import com.timesphere.timesphere.Cloudinary.CloudinaryService;
 import com.timesphere.timesphere.Cloudinary.CloudinaryUploadResult;
 import com.timesphere.timesphere.dto.comment.CreateCommentRequest;
 import com.timesphere.timesphere.dto.task.TaskCommentDTO;
-import com.timesphere.timesphere.entity.Attachment;
-import com.timesphere.timesphere.entity.Task;
-import com.timesphere.timesphere.entity.TaskComment;
-import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.entity.*;
 import com.timesphere.timesphere.entity.type.CommentVisibility;
+import com.timesphere.timesphere.entity.type.NotificationType;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.mapper.TaskCommentMapper;
@@ -39,6 +37,7 @@ public class TaskCommentService {
     private final TaskCommentMapper commentMapper;
     private final CloudinaryService cloudinaryService;
     private final AttachmentRepository attachmentRepo;
+    private final NotificationService notificationService;
 
     public String deleteComment(String commentId, User currentUser) {
         TaskComment comment = taskCommentRepo.findById(commentId)
@@ -121,6 +120,38 @@ public class TaskCommentService {
 
         // 7. Lưu và trả DTO
         TaskComment saved = taskCommentRepo.save(comment);
+
+        // 8. Gửi thông báo tuỳ vào loại comment
+        TeamWorkspace team = task.getColumn().getTeam();
+
+        if (visibility == CommentVisibility.PUBLIC) {
+            System.out.println("🔔 Notifying assignees for PUBLIC comment:");
+            task.getAssignees().forEach(assignee -> {
+                System.out.println(" - " + assignee.getUser().getEmail());
+                notificationService.notify(
+                        assignee.getUser(),
+                        user,
+                        user.getFullName() + " has commented on the task \"" + task.getTaskTitle() + "\"",
+                        "Team: " + team.getTeamName(),
+                        "/mainpage/team/" + team.getId() ,
+                        NotificationType.COMMENT_PUBLIC,
+                        task.getId()
+                );
+            });
+        } else {
+            visibleUsers.forEach(visibleUser -> {
+                notificationService.notify(
+                        visibleUser,
+                        user,
+                        user.getFullName() + " has sent you a comment on the task \"" + task.getTaskTitle() + "\"",
+                        "Team: " + team.getTeamName(),
+                        "/mainpage/team/" + team.getId() ,
+                        NotificationType.COMMENT_PRIVATE,
+                        task.getId()
+                );
+            });
+        }
+
         return commentMapper.toDto(saved);
     }
 

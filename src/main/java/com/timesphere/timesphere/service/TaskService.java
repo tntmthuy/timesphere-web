@@ -7,6 +7,7 @@ import com.timesphere.timesphere.dto.task.CreateTaskRequest;
 import com.timesphere.timesphere.dto.task.TaskResponseDTO;
 import com.timesphere.timesphere.dto.task.UpdateTaskRequest;
 import com.timesphere.timesphere.entity.*;
+import com.timesphere.timesphere.entity.type.NotificationType;
 import com.timesphere.timesphere.entity.type.TeamRole;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
@@ -29,6 +30,7 @@ public class TaskService {
     private final TaskRepository taskRepo;
     private final KanbanColumnRepository columnRepo;
     private final TeamMemberRepository memberRepo;
+    private final NotificationService notificationService;
 
     public boolean canModifyTask(Task task, User user) {
         TeamWorkspace team = task.getColumn().getTeam();
@@ -61,7 +63,18 @@ public class TaskService {
                 .filter(m -> m.getTeam().getId().equals(team.getId()))
                 .toList();
 
-        membersToAssign.forEach(task.getAssignees()::add);
+        membersToAssign.forEach(member -> {
+            task.getAssignees().add(member); // ✅ vừa gán vừa gửi noti
+            notificationService.notify(
+                    member.getUser(),
+                    currentUser,
+                    currentUser.getFullName() + " has assigned you to the task \"" + task.getTaskTitle() + "\"",
+                    "Task: " + task.getTaskTitle(),
+                    "/mainpage/team/" + team.getId(),
+                    NotificationType.TASK_ASSIGNED,
+                    task.getId()
+            );
+        });
 
         Task updated = taskRepo.save(task);
         return TaskMapper.toDto(updated);

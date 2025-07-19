@@ -28,7 +28,7 @@ public class NotificationMapper {
                 .senderAvatar(n.getSender() != null ? n.getSender().getAvatarUrl() : null)
                 .timeAgo(TimeUtils.timeAgo(n.getCreatedAt()))
                 .createdAt(n.getCreatedAt())
-                .referenceId(n.getReferenceId())
+                .referenceId(n.getReferenceId()) //taskId
                 .inviteStatus(getInviteStatus(n))
                 .build();
     }

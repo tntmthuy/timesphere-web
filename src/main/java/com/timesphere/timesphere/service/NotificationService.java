@@ -29,6 +29,7 @@ public class NotificationService {
     }
 
     public void notify(User recipient, User sender, String title, String content, String url, NotificationType type, String referenceId) {
+        System.out.println("📝 Saving notification: " + type + " → " + recipient.getEmail());
         Notification noti = Notification.builder()
                 .recipient(recipient)
                 .sender(sender)

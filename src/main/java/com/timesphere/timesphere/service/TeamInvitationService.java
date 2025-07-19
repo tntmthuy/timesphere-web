@@ -98,8 +98,8 @@ public class TeamInvitationService {
         notificationService.notify(
                 invitedUser,
                 inviter,
-                inviter.getFullName() + " đã mời bạn tham gia nhóm",
-                "Nhóm: " + team.getTeamName(),
+                inviter.getFullName() + " has invited you to join the team",
+                "Team: " + team.getTeamName(),
                 "/mainpage/notification",
                 NotificationType.INVITE,
                 team.getId()
