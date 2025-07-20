@@ -16,7 +16,9 @@ public enum Permission {
 
     PROFILE_USER("user:manage_profile"),
 
-    NOTIFICATION_USER("user:read_notification")
+    NOTIFICATION_USER("user:read_notification"),
+
+    PAYMENT("user:payment_by_paypal")
     ;
 
     private final String permission;

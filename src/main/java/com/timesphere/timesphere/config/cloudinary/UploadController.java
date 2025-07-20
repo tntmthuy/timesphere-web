@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.Cloudinary;
+package com.timesphere.timesphere.config.cloudinary;
 
 import com.timesphere.timesphere.dto.comment.AttachmentDTO;
 import lombok.RequiredArgsConstructor;

@@ -19,7 +19,9 @@ public enum Role {
                     KANBAN_BOARD,
                     PROFILE_USER,
                     TASK_COMMENT,
-                    NOTIFICATION_USER
+                    NOTIFICATION_USER,
+                    PAYMENT
+
             )
     ),
     PREMIUM(
@@ -28,7 +30,8 @@ public enum Role {
                     KANBAN_BOARD,
                     PROFILE_USER,
                     TASK_COMMENT,
-                    NOTIFICATION_USER
+                    NOTIFICATION_USER,
+                    PAYMENT
             )
     ),
     ADMIN(
@@ -38,7 +41,8 @@ public enum Role {
                     KANBAN_BOARD,
                     PROFILE_USER,
                     TASK_COMMENT,
-                    NOTIFICATION_USER // chưa rõ có viết riêng không
+                    NOTIFICATION_USER, // chưa rõ có viết riêng không
+                    PAYMENT
             )
     );
 

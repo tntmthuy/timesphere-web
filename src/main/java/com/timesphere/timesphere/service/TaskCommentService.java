@@ -1,7 +1,7 @@
 package com.timesphere.timesphere.service;
 
-import com.timesphere.timesphere.Cloudinary.CloudinaryService;
-import com.timesphere.timesphere.Cloudinary.CloudinaryUploadResult;
+import com.timesphere.timesphere.config.cloudinary.CloudinaryService;
+import com.timesphere.timesphere.config.cloudinary.CloudinaryUploadResult;
 import com.timesphere.timesphere.dto.comment.CreateCommentRequest;
 import com.timesphere.timesphere.dto.task.TaskCommentDTO;
 import com.timesphere.timesphere.entity.*;

@@ -1,4 +1,4 @@
-package com.timesphere.timesphere.Cloudinary;
+package com.timesphere.timesphere.config.cloudinary;
 
 import lombok.Builder;
 import lombok.Getter;

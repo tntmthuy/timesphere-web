@@ -42,3 +42,7 @@ logging:
       springframework:
         security: DEBUG
 
+paypal:
+  client-id: ASxgUyWZdRAiYmJFcDcAS6ZHgT94DxaByOLjcEIbyAKsXUxnQ-M90ywlNf3HdyS0NXzv2bNIJj2M0M0L
+  client-secret: EALSJMssEKJotwN0PcJ14FeAoVv4GlXguNdRpc4pNbf6E6I_yA61UUPmHYVHN8NY5zlnFzMLC2yswynk
+  mode: sandbox

@@ -95,6 +95,19 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<!--Paypal-->
+		<dependency>
+			<groupId>com.paypal.sdk</groupId>
+			<artifactId>paypal-core</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.paypal.sdk/rest-api-sdk -->
+		<dependency>
+			<groupId>com.paypal.sdk</groupId>
+			<artifactId>rest-api-sdk</artifactId>
+			<version>1.14.0</version>
+		</dependency>
+
 		<!--MFA-->
 		<dependency>
 			<groupId>dev.samstevens.totp</groupId>
