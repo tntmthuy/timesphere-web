@@ -3,7 +3,10 @@ package com.timesphere.timesphere.config.paypal;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
+import com.timesphere.timesphere.service.UpgradeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ public class PaypalService {
     ) throws PayPalRESTException {
         Amount amount = new Amount();
         amount.setCurrency(currency);
-        amount.setTotal(String.format(Locale.forLanguageTag(currency), "%.2f", total));
+        amount.setTotal(String.format(Locale.forLanguageTag(currency), "%.2f", total)); // 9.99$ - 9,99€
 
         Transaction transaction = new Transaction();
         transaction.setDescription(description);
@@ -53,7 +56,6 @@ public class PaypalService {
         return payment.create(apiContext);
     }
 
-    //thực hiện thanh toán
     public Payment executePayment(
             String paymentId,
             String payerId
@@ -64,7 +66,7 @@ public class PaypalService {
         PaymentExecution paymentExecution = new PaymentExecution();
         paymentExecution.setPayerId(payerId);
 
-        return  payment.execute(apiContext, paymentExecution);
+        return payment.execute(apiContext, paymentExecution);
     }
 }
 

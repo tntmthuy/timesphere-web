@@ -32,4 +32,14 @@ public interface TaskRepository extends JpaRepository<Task, String> {
     //lấy tất cả task thuộc 1 team
     @Query("SELECT t FROM Task t WHERE t.column.team = :team")
     List<Task> findByColumn_Team(@Param("team") TeamWorkspace team);
+
+    //lấy lịch
+    @Query("""
+    SELECT CAST(t.dateDue AS date), COUNT(t.id)
+    FROM Task t
+    WHERE t.column.team.id = :teamId AND t.dateDue IS NOT NULL
+    GROUP BY CAST(t.dateDue AS date)
+    ORDER BY CAST(t.dateDue AS date) ASC
+""")
+    List<Object[]> countTasksGroupedByDate(@Param("teamId") String teamId);
 }

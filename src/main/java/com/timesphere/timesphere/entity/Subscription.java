@@ -36,6 +36,7 @@ public class Subscription extends BaseEntity{
 
     private String paymentId; // ✅ ID giao dịch từ PayPal nếu có
 
-    @OneToMany(mappedBy = "subscription")
-    private List<User> users;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

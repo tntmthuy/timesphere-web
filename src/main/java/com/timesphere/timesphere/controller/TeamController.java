@@ -3,10 +3,12 @@ package com.timesphere.timesphere.controller;
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.comment.AttachmentDTO;
 import com.timesphere.timesphere.dto.member.TeamMemberDTO;
+import com.timesphere.timesphere.dto.task.CalendarDayResponse;
 import com.timesphere.timesphere.dto.team.*;
 import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.entity.type.AttachmentType;
+import com.timesphere.timesphere.service.TeamCalendarService;
 import com.timesphere.timesphere.service.TeamMemberService;
 import com.timesphere.timesphere.service.TeamService;
 import jakarta.validation.Valid;
@@ -18,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,6 +31,7 @@ public class TeamController {
 
     private final TeamService teamService;
     private final TeamMemberService teamMemberService;
+    private final TeamCalendarService teamCalendarService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('user:manage_team')")
@@ -166,4 +170,17 @@ public class TeamController {
         List<AttachmentDTO> files = teamService.getAllAttachmentsInTeam(teamId, type);
         return ResponseEntity.ok(files);
     }
+
+    //lịch
+    @GetMapping("/{teamId}/calendar")
+    @PreAuthorize("hasAuthority('premium:get_calendar')")
+    public ResponseEntity<?> getCalendar(@PathVariable String teamId) {
+        List<CalendarDayResponse> days = teamCalendarService.getCalendarByTeam(teamId);
+
+        return ResponseEntity.ok(Map.of(
+                "teamId", teamId,
+                "days", days
+        ));
+    }
+
 }

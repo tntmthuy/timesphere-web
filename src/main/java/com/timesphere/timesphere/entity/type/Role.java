@@ -31,7 +31,8 @@ public enum Role {
                     PROFILE_USER,
                     TASK_COMMENT,
                     NOTIFICATION_USER,
-                    PAYMENT
+                    PAYMENT,
+                    CALENDAR
             )
     ),
     ADMIN(

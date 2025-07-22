@@ -70,10 +70,8 @@ public class User extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<TodoList> todoLists;
 
-    @ManyToOne
-    @JoinColumn(name = "subscription_id")
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Subscription subscription;
-
 
     public String getFullName() {
         return firstname + " " + lastname;

@@ -18,7 +18,9 @@ public enum Permission {
 
     NOTIFICATION_USER("user:read_notification"),
 
-    PAYMENT("user:payment_by_paypal")
+    PAYMENT("user:payment_by_paypal"),
+
+    CALENDAR("premium:get_calendar")
     ;
 
     private final String permission;
