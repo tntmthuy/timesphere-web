@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/upload/**").hasAnyRole(FREE.name(), PREMIUM.name())
                         .requestMatchers("/api/kanban/**").hasAnyRole(FREE.name(), PREMIUM.name())
                         .requestMatchers("/api/comment/**").hasAnyRole(FREE.name(), PREMIUM.name())
+                        .requestMatchers("/api/focus/**").hasAnyRole(FREE.name(), PREMIUM.name())
                         .requestMatchers("/api").hasRole(ADMIN.name())
                         .requestMatchers("/", "/payment/**").permitAll()
                         .anyRequest().authenticated()

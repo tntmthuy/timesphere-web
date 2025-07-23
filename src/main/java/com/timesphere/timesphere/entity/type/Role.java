@@ -20,8 +20,8 @@ public enum Role {
                     PROFILE_USER,
                     TASK_COMMENT,
                     NOTIFICATION_USER,
-                    PAYMENT
-
+                    PAYMENT,
+                    FOCUS
             )
     ),
     PREMIUM(
@@ -32,7 +32,8 @@ public enum Role {
                     TASK_COMMENT,
                     NOTIFICATION_USER,
                     PAYMENT,
-                    CALENDAR
+                    CALENDAR,
+                    FOCUS
             )
     ),
     ADMIN(
@@ -43,7 +44,8 @@ public enum Role {
                     PROFILE_USER,
                     TASK_COMMENT,
                     NOTIFICATION_USER, // chưa rõ có viết riêng không
-                    PAYMENT
+                    PAYMENT,
+                    FOCUS
             )
     );
 

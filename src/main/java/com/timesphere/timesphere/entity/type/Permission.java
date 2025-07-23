@@ -20,7 +20,9 @@ public enum Permission {
 
     PAYMENT("user:payment_by_paypal"),
 
-    CALENDAR("premium:get_calendar")
+    CALENDAR("premium:get_calendar"),
+
+    FOCUS("user:focus_sessions")
     ;
 
     private final String permission;
