@@ -3,6 +3,7 @@ package com.timesphere.timesphere.service;
 
 import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.subtask.CreateSubtaskRequest;
+import com.timesphere.timesphere.dto.task.AssignedTaskSummary;
 import com.timesphere.timesphere.dto.task.CreateTaskRequest;
 import com.timesphere.timesphere.dto.task.TaskResponseDTO;
 import com.timesphere.timesphere.dto.task.UpdateTaskRequest;
@@ -20,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class TaskService {
     private final TaskRepository taskRepo;
     private final KanbanColumnRepository columnRepo;
     private final TeamMemberRepository memberRepo;
+    private final TaskRepository taskRepository;
     private final NotificationService notificationService;
 
     public boolean canModifyTask(Task task, User user) {
@@ -43,6 +47,35 @@ public class TaskService {
     }
 
     // 🛒TASK
+
+    //task được gán
+    public List<AssignedTaskSummary> getMyAssignedTasks(User user) {
+        List<Task> allTasks = taskRepository.findAll(); // có thể refactor sau
+
+        List<AssignedTaskSummary> result = new ArrayList<>();
+
+        for (Task task : allTasks) {
+            for (TeamMember assignee : task.getAssignees()) {
+                if (assignee.getUser().getId().equals(user.getId())) {
+                    TeamWorkspace team = assignee.getTeam();
+
+                    if (team != null) {
+                        result.add(new AssignedTaskSummary(
+                                task.getId(),
+                                task.getTaskTitle(),
+                                team.getId(),
+                                team.getTeamName(),
+                                "mainpage/team/" + team.getId()
+                        ));
+                    }
+                    break; // task chỉ cần match một assignee là user
+                }
+            }
+        }
+
+        return result;
+    }
+
 
     // gán task
     @Transactional

@@ -2,6 +2,7 @@ package com.timesphere.timesphere.repository;
 
 import com.timesphere.timesphere.entity.Task;
 import com.timesphere.timesphere.entity.TeamWorkspace;
+import com.timesphere.timesphere.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +43,11 @@ public interface TaskRepository extends JpaRepository<Task, String> {
     ORDER BY CAST(t.dateDue AS date) ASC
 """)
     List<Object[]> countTasksGroupedByDate(@Param("teamId") String teamId);
+
+    //lấy task được gán
+    @Query("""
+    SELECT t FROM Task t JOIN t.assignees a
+    WHERE a.user = :user
+""")
+    List<Task> findAssignedTasksByUser(@Param("user") User user);
 }

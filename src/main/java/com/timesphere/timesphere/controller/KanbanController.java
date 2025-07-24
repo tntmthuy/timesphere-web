@@ -7,10 +7,7 @@ import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.subtask.CreateSubtaskRequest;
 import com.timesphere.timesphere.dto.subtask.ReorderSubtaskRequest;
 import com.timesphere.timesphere.dto.subtask.UpdateSubtaskRequest;
-import com.timesphere.timesphere.dto.task.CreateTaskRequest;
-import com.timesphere.timesphere.dto.task.MoveTaskToColumnRequest;
-import com.timesphere.timesphere.dto.task.TaskResponseDTO;
-import com.timesphere.timesphere.dto.task.UpdateTaskRequest;
+import com.timesphere.timesphere.dto.task.*;
 import com.timesphere.timesphere.entity.KanbanColumn;
 import com.timesphere.timesphere.entity.Task;
 import com.timesphere.timesphere.entity.User;
@@ -96,8 +93,19 @@ public class KanbanController {
     }
 
     @GetMapping("/task/{id}")
+    @PreAuthorize("hasAuthority('user:manage_board')")
     public ResponseEntity<?> getTaskById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết task thành công!", taskService.getTaskById(id)));
+    }
+
+    //task đuược gán
+    @GetMapping("/tasks/assigned-to-me")
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<ApiResponse<List<AssignedTaskSummary>>> getMyTasks(
+            @AuthenticationPrincipal User user
+    ) {
+        List<AssignedTaskSummary> result = taskService.getMyAssignedTasks(user);
+        return ResponseEntity.ok(ApiResponse.success("Nhiệm vụ đang được giao", result));
     }
 
     // gán task

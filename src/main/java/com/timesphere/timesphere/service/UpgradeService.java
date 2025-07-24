@@ -1,10 +1,13 @@
 package com.timesphere.timesphere.service;
 
+import com.timesphere.timesphere.dto.plan.SubscriptionInfoDto;
 import com.timesphere.timesphere.entity.Subscription;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.entity.type.PlanType;
 import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.type.SubscriptionStatus;
+import com.timesphere.timesphere.exception.AppException;
+import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.repository.UserRepository;
 import com.timesphere.timesphere.util.JwtUtil;
 import jakarta.transaction.Transactional;
@@ -53,4 +56,20 @@ public class UpgradeService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         return jwtUtil.generateToken(userDetails); // ✅ cấp lại token PREMIUM
     }
+
+    public SubscriptionInfoDto getSubscriptionInfo(User user) {
+        Subscription subscription = user.getSubscription();
+
+        if (subscription == null) {
+            throw new AppException(ErrorCode.NOT_JOINED_ANY_TEAM, "Người dùng chưa đăng ký gói nào");
+        }
+
+        return new SubscriptionInfoDto(
+                subscription.getPlanType(),
+                subscription.getStatus(),
+                subscription.getStartDate(),
+                subscription.getEndDate()
+        );
+    }
+
 }
