@@ -1,12 +1,15 @@
 package com.timesphere.timesphere.service;
 
 import com.timesphere.timesphere.dto.focus.FocusSessionResponse;
+import com.timesphere.timesphere.dto.focus.UserFocusStats;
 import com.timesphere.timesphere.entity.FocusSession;
 import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.mapper.FocusMapper;
 import com.timesphere.timesphere.repository.FocusRepository;
+import com.timesphere.timesphere.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +26,7 @@ public class FocusService {
 
     private final FocusRepository focusRepository;
     private final FocusMapper focusMapper;
+    private final UserRepository userRepository;
 
     /**
      * Khởi tạo phiên tập trung mới
@@ -101,5 +106,40 @@ public class FocusService {
                 user, FocusSession.Status.COMPLETED
         );
         return focusMapper.toResponseList(sessions); // convert tại đây
+    }
+
+    //xóa phiên
+    public void deleteSession(Long sessionId, User user) {
+        FocusSession session = focusRepository.findById(sessionId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY, "Không tìm thấy phiên tập trung."));
+
+        if (!session.getUser().getId().equals(user.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Bạn không có quyền xóa phiên này.");
+        }
+
+        focusRepository.delete(session);
+    }
+
+    //phiên tất cả người dùng
+    public List<UserFocusStats> getAllUserFocusStats() {
+        List<User> users = userRepository.findAll();
+
+        List<UserFocusStats> results = new ArrayList<>();
+
+        for (User user : users) {
+            if (user.getRole() == Role.ADMIN) continue; // bỏ admin khỏi xếp hạng
+
+            List<FocusSession> sessions = focusRepository.findByUserAndModeAndStatus(
+                    user, "focus", FocusSession.Status.COMPLETED
+            );
+
+            int total = sessions.stream()
+                    .mapToInt(FocusSession::getActualMinutes)
+                    .sum();
+
+            results.add(new UserFocusStats(user.getFullName(), user.getAvatarUrl(), total));
+        }
+
+        return results;
     }
 }

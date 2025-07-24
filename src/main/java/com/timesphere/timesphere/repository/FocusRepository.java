@@ -37,4 +37,6 @@ public interface FocusRepository extends JpaRepository<FocusSession, Long> {
 
     //lấy phiên
     List<FocusSession> findByUserAndStatusOrderByStartedAtDesc(User user, FocusSession.Status status);
+
+    List<FocusSession> findByUserAndModeAndStatus(User user, String mode, FocusSession.Status status);
 }

@@ -2,6 +2,7 @@ package com.timesphere.timesphere.controller;
 
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.focus.FocusSessionResponse;
+import com.timesphere.timesphere.dto.focus.UserFocusStats;
 import com.timesphere.timesphere.entity.FocusSession;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.service.FocusService;
@@ -67,5 +68,24 @@ public class FocusController {
     ) {
         List<FocusSessionResponse> responses = focusService.getCompletedSessions(currentUser);
         return ResponseEntity.ok(ApiResponse.success("Các phiên đã hoàn thành", responses));
+    }
+
+    //xóa phiên
+    @DeleteMapping("/{sessionId}")
+    @PreAuthorize("hasAuthority('user:focus_sessions')")
+    public ResponseEntity<ApiResponse<String>> deleteFocus(
+            @PathVariable Long sessionId,
+            @AuthenticationPrincipal User user
+    ) {
+        focusService.deleteSession(sessionId, user);
+        return ResponseEntity.ok(ApiResponse.success("Đã xóa phiên thành công"));
+    }
+
+    //thời gian tất cả
+    @GetMapping("/stats/all")
+    @PreAuthorize("hasAuthority('user:focus_sessions')")
+    public ResponseEntity<ApiResponse<List<UserFocusStats>>> getAllFocusStats() {
+        List<UserFocusStats> stats = focusService.getAllUserFocusStats();
+        return ResponseEntity.ok(ApiResponse.success("Tổng thời gian tập trung của tất cả người dùng", stats));
     }
 }
