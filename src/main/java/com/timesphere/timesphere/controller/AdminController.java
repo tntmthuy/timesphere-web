@@ -18,31 +18,6 @@ public class AdminController {
 
     private final UserService userService;
 
-    //sườn để test
-    @GetMapping
-    @PreAuthorize("hasAuthority('admin:read')")
-    public String get(){
-        return "GET: admin controller";
-    }
-
-    @PostMapping
-    @PreAuthorize("hasAuthority('admin:create')")
-    public String create(){
-        return "POST: admin controller";
-    }
-
-    @PutMapping
-    @PreAuthorize("hasAuthority('admin:update')")
-    public String update(){
-        return "UPDATE: admin controller";
-    }
-
-    @DeleteMapping
-    @PreAuthorize("hasAuthority('admin:delete')")
-    public String delete(){
-        return "DELETE: admin controller";
-    }
-
     // vào các chức năng cơ bản
     @GetMapping("/searchUser")
     @PreAuthorize("hasAuthority('admin:read_all_users')")

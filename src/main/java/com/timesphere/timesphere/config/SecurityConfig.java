@@ -42,10 +42,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // ✅ Cho phép mọi người đăng nhập & đăng ký
-                        .requestMatchers("/api/upload/**").hasAnyRole(FREE.name(), PREMIUM.name())
-                        .requestMatchers("/api/kanban/**").hasAnyRole(FREE.name(), PREMIUM.name())
-                        .requestMatchers("/api/comment/**").hasAnyRole(FREE.name(), PREMIUM.name())
-                        .requestMatchers("/api/focus/**").hasAnyRole(FREE.name(), PREMIUM.name())
+                        .requestMatchers("/api/upload/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
+                        .requestMatchers("/api/kanban/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
+                        .requestMatchers("/api/comment/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
+                        .requestMatchers("/api/focus/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
                         .requestMatchers("/api").hasRole(ADMIN.name())
                         .requestMatchers("/", "/payment/**").permitAll()
                         .anyRequest().authenticated()

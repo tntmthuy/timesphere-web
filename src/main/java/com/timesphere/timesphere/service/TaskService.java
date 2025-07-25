@@ -65,14 +65,14 @@ public class TaskService {
                                 task.getTaskTitle(),
                                 team.getId(),
                                 team.getTeamName(),
-                                "mainpage/team/" + team.getId()
+                                "mainpage/team/" + team.getId(),
+                                task.getDateDue()
                         ));
                     }
                     break; // task chỉ cần match một assignee là user
                 }
             }
         }
-
         return result;
     }
 
