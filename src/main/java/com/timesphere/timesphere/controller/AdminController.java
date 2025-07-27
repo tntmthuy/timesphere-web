@@ -1,7 +1,6 @@
 package com.timesphere.timesphere.controller;
 
-import com.timesphere.timesphere.dto.admin.ChartPoint;
-import com.timesphere.timesphere.dto.admin.SummaryResponse;
+import com.timesphere.timesphere.dto.admin.*;
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.plan.SubscriptionInfoDto;
 import com.timesphere.timesphere.entity.User;
@@ -28,6 +27,36 @@ public class AdminController {
 
     private final AdminService adminService;
     private final UpgradeService upgradeService;
+
+    //lấy danh sách người dùng
+    @GetMapping("/users")
+    public ResponseEntity<ApiResponse<List<UserSummaryDto>>> getAllUsers() {
+        List<UserSummaryDto> users = adminService.getAllUsers();
+        return ResponseEntity.ok(ApiResponse.success("Danh sách người dùng", users));
+    }
+
+    //set role
+    @PutMapping("/users/{id}/role")
+    public ResponseEntity<ApiResponse<String>> updateUserRole(
+            @PathVariable String id,
+            @RequestBody UpdateUserRoleRequest request
+    ) {
+        adminService.updateUserRole(id, request.role());
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật vai trò thành công"));
+    }
+
+    //xoá
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable String id) {
+        adminService.deleteUserById(id);
+        return ResponseEntity.ok(ApiResponse.success("Xóa người dùng thành công"));
+    }
+
+    //danh sách nhóm
+    @GetMapping("/teams")
+    public ResponseEntity<List<TeamDto>> getTeams() {
+        return ResponseEntity.ok(adminService.getAllTeamsWithMembers());
+    }
 
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<SummaryResponse>> getDashboardSummary() {

@@ -29,6 +29,7 @@ public enum ErrorCode {
     USER_NOT_EXISTED(1202, "Người dùng không tồn tại.", NOT_FOUND),
     ROLE_REQUIRED(1203, "Vui lòng chọn vai trò cho người dùng.", BAD_REQUEST),
     ROLE_NOT_SUPPORTED(1204, "Vai trò không được hỗ trợ.", BAD_REQUEST),
+    CANNOT_DELETE_ADMIN(1205, "Không thể xóa người dùng ADMIN.", BAD_REQUEST),
 
     // === 130x: Auth Token ===
     UNAUTHENTICATED(1301, "Chưa xác thực người dùng.", HttpStatus.UNAUTHORIZED),

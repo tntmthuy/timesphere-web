@@ -19,4 +19,8 @@ public interface TaskCommentRepository extends JpaRepository<TaskComment, String
     //lấy comment của 1 user trong các tasks thuộc team
     @Query("SELECT c FROM TaskComment c WHERE c.task.column.team = :team AND c.createdBy = :user")
     List<TaskComment> findByTask_Column_TeamAndCreatedBy(@Param("team") TeamWorkspace team, @Param("user") User user);
+
+    // lấy tất cả comment nhoóm
+    @Query("SELECT COUNT(c) FROM TaskComment c WHERE c.task.column.team = :team")
+    long countByTeam(@Param("team") TeamWorkspace team);
 }

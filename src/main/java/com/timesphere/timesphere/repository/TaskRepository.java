@@ -50,4 +50,8 @@ public interface TaskRepository extends JpaRepository<Task, String> {
     WHERE a.user = :user
 """)
     List<Task> findAssignedTasksByUser(@Param("user") User user);
+
+    //tổng task 1 nhóm
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.column.team = :team")
+    long countByTeam(@Param("team") TeamWorkspace team);
 }

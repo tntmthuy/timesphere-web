@@ -24,9 +24,12 @@ public interface AttachmentRepository extends JpaRepository<Attachment, String> 
 """)
     List<Attachment> findByTeamId(@Param("teamId") String teamId, @Param("type") AttachmentType type);
 
-    List<Attachment> findByComment_Id(String commentId);
-    boolean existsByIdAndComment_CreatedBy_Id(String attachmentId, String userId);
-    void deleteByComment_Id(String commentId);
+    @Query("""
+    SELECT COUNT(a) FROM Attachment a
+    WHERE a.comment.task.column.team.id = :teamId
+      AND (:type IS NULL OR a.type = :type)
+""")
+    long countByTeamId(@Param("teamId") String teamId, @Param("type") AttachmentType type);
 
 }
 
