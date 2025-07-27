@@ -10,6 +10,8 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,36 +59,40 @@ public class UserSearchDao {
         return query.getResultList();
     }
 
-    public List<User> findAllByCriteria(
-            SearchRequest request
-    ) {
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
+    public List<User> findAllByCriteria(SearchRequest request) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<User> cq = cb.createQuery(User.class);
+        Root<User> root = cq.from(User.class);
+
         List<Predicate> predicates = new ArrayList<>();
 
-        // select from user
-        Root<User> root = criteriaQuery.from(User.class);
-        if (request.getFirstname() != null){
-            Predicate firstnamePredicate = criteriaBuilder
-                    .like(root.get("firstname"), "%" + request.getFirstname() +"%");
-            predicates.add(firstnamePredicate);
-        }
-        if (request.getLastname() != null){
-            Predicate lastnamePredicate = criteriaBuilder
-                    .like(root.get("lastname"), "%" + request.getLastname() +"%");
-            predicates.add(lastnamePredicate);
-        }
-        if (request.getEmail() != null){
-            Predicate emailPredicate = criteriaBuilder
-                    .like(root.get("email"), "%" + request.getEmail() +"%");
-            predicates.add(emailPredicate);
+        // 🔍 Keyword: gộp họ + tên + email
+        if (request.getKeyword() != null && !request.getKeyword().isBlank()) {
+            String kw = "%" + request.getKeyword().trim() + "%";
+            predicates.add(cb.or(
+                    cb.like(root.get("firstname"), kw),
+                    cb.like(root.get("lastname"), kw),
+                    cb.like(root.get("email"), kw)
+            ));
         }
 
-        criteriaQuery.where(
-                criteriaBuilder.or(predicates.toArray(new Predicate[0]))
-        );
+        // 🎭 Vai trò
+        if (request.getRole() != null) {
+            predicates.add(cb.equal(root.get("role"), request.getRole()));
+        }
 
-        TypedQuery<User> query = em.createQuery(criteriaQuery);
-        return query.getResultList();
+        // 📅 Ngày tạo (khoảng)
+        if (request.getCreatedFrom() != null && request.getCreatedTo() != null) {
+            try {
+                LocalDate start = LocalDate.parse(request.getCreatedFrom());
+                LocalDate end = LocalDate.parse(request.getCreatedTo());
+                predicates.add(cb.between(root.get("createdAt"), start.atStartOfDay(), end.atTime(23, 59, 59)));
+            } catch (DateTimeParseException ex) {
+                // Tuỳ bạn xử lý ngoại lệ nhen
+            }
+        }
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        return em.createQuery(cq).getResultList();
     }
 }
