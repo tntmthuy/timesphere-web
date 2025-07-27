@@ -3,7 +3,10 @@ package com.timesphere.timesphere.repository;
 import com.timesphere.timesphere.entity.FocusSession;
 import com.timesphere.timesphere.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,4 +42,14 @@ public interface FocusRepository extends JpaRepository<FocusSession, Long> {
     List<FocusSession> findByUserAndStatusOrderByStartedAtDesc(User user, FocusSession.Status status);
 
     List<FocusSession> findByUserAndModeAndStatus(User user, String mode, FocusSession.Status status);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE DATE(u.createdAt) = :date")
+    long countByCreatedDate(@Param("date") LocalDate date);
+
+    @Query("""
+    SELECT COUNT(f) FROM FocusSession f
+    WHERE DATE(f.createdAt) = :date
+    AND f.status = com.timesphere.timesphere.entity.FocusSession.Status.COMPLETED
+""")
+    long countCompletedFocusByDate(@Param("date") LocalDate date);
 }

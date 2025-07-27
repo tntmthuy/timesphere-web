@@ -34,9 +34,10 @@ public class Subscription extends BaseEntity{
     @Column(nullable = false)
     private SubscriptionStatus status; // ✅ ACTIVE / EXPIRED / CANCELLED
 
+    @Column(nullable = false, unique = true)
     private String paymentId; // ✅ ID giao dịch từ PayPal nếu có
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

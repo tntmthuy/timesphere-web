@@ -75,6 +75,9 @@ public enum ErrorCode {
 
     // === 500x: Notification ===
     NOTIFICATION_NOT_FOUND(5001, "Không tìm thấy thông báo.", NOT_FOUND),
+
+    // === 600x: Payment ===
+    SUBSCRIPTION_ALREADY_ACTIVE(6001, "Bạn đã có gói đăng ký đang hoạt động", CONFLICT),
     ;
     private final int code;
     private final String message;

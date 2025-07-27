@@ -34,10 +34,10 @@ public class PlanController {
 
     @GetMapping("/subscription/me")
     @PreAuthorize("hasAuthority('user:payment_by_paypal')")
-    public ResponseEntity<ApiResponse<SubscriptionInfoDto>> getMySubscription(
+    public ResponseEntity<ApiResponse<List<SubscriptionInfoDto>>> getMySubscriptions(
             @AuthenticationPrincipal User user
     ) {
-        SubscriptionInfoDto result = upgradeService.getSubscriptionInfo(user);
-        return ResponseEntity.ok(ApiResponse.success("Thông tin gói đăng ký", result));
+        List<SubscriptionInfoDto> result = upgradeService.getSubscriptionInfo(user);
+        return ResponseEntity.ok(ApiResponse.success("Thông tin các gói đăng ký", result));
     }
 }

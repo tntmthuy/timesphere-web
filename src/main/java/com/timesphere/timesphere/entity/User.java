@@ -49,9 +49,6 @@ public class User extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-//    private LocalDateTime user_create_at;
-//    private LocalDateTime user_update_at;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -69,8 +66,10 @@ public class User extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<TodoList> todoLists;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Subscription subscription;
+    //    @OneToOne(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    private Subscription subscription;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Subscription> subscriptions;
 
     public String getFullName() {
         return firstname + " " + lastname;

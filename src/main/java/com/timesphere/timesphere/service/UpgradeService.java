@@ -8,6 +8,7 @@ import com.timesphere.timesphere.entity.type.Role;
 import com.timesphere.timesphere.entity.type.SubscriptionStatus;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
+import com.timesphere.timesphere.repository.SubscriptionRepository;
 import com.timesphere.timesphere.repository.UserRepository;
 import com.timesphere.timesphere.util.JwtUtil;
 import jakarta.transaction.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +27,19 @@ import java.time.LocalDateTime;
 public class UpgradeService {
 
     private final UserRepository userRepository;
-
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final SubscriptionRepository subscriptionRepository;
+
+    public List<SubscriptionInfoDto> getAllSubscriptions() {
+        return subscriptionRepository.findAll().stream()
+                .map(sub -> new SubscriptionInfoDto(
+                        sub.getPlanType(),
+                        sub.getStatus(),
+                        sub.getStartDate(),
+                        sub.getEndDate()
+                )).toList();
+    }
 
     @Transactional
     public String upgradeToPremiumAndIssueTokenWithSubscription(String email, PlanType planType, String paymentId) {
@@ -50,26 +62,27 @@ public class UpgradeService {
                 .build();
 
         user.setRole(Role.PREMIUM);
-        user.setSubscription(subscription);
-        userRepository.save(user);
+        userRepository.save(user); // 👈 Cập nhật role thôi
+
+        subscriptionRepository.save(subscription); // 👈 Lưu bản ghi subscription riêng biệt
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        return jwtUtil.generateToken(userDetails); // ✅ cấp lại token PREMIUM
+        return jwtUtil.generateToken(userDetails); // ✅ Cấp lại token PREMIUM
     }
 
-    public SubscriptionInfoDto getSubscriptionInfo(User user) {
-        Subscription subscription = user.getSubscription();
+    public List<SubscriptionInfoDto> getSubscriptionInfo(User user) {
+        List<Subscription> subscriptions = subscriptionRepository.findByUser(user);
 
-        if (subscription == null) {
+        if (subscriptions.isEmpty()) {
             throw new AppException(ErrorCode.NOT_JOINED_ANY_TEAM, "Người dùng chưa đăng ký gói nào");
         }
 
-        return new SubscriptionInfoDto(
-                subscription.getPlanType(),
-                subscription.getStatus(),
-                subscription.getStartDate(),
-                subscription.getEndDate()
-        );
+        return subscriptions.stream()
+                .map(sub -> new SubscriptionInfoDto(
+                        sub.getPlanType(),
+                        sub.getStatus(),
+                        sub.getStartDate(),
+                        sub.getEndDate()
+                )).toList();
     }
-
 }
