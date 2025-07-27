@@ -1,13 +1,17 @@
 package com.timesphere.timesphere.service;
 
+import com.timesphere.timesphere.dao.SearchRequest;
+import com.timesphere.timesphere.dao.UserSearchDao;
 import com.timesphere.timesphere.dto.admin.ChartPoint;
 import com.timesphere.timesphere.dto.admin.SummaryResponse;
 import com.timesphere.timesphere.dto.admin.TeamDto;
 import com.timesphere.timesphere.dto.admin.UserSummaryDto;
 import com.timesphere.timesphere.dto.member.TeamMemberDTO;
+import com.timesphere.timesphere.entity.TeamMember;
 import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.entity.type.Role;
+import com.timesphere.timesphere.entity.type.TeamRole;
 import com.timesphere.timesphere.exception.AppException;
 import com.timesphere.timesphere.exception.ErrorCode;
 import com.timesphere.timesphere.repository.*;
@@ -19,10 +23,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.DayOfWeek;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +45,30 @@ public class AdminService {
     private final TaskRepository taskRepo;
     private final TaskCommentRepository commentRepo;
     private final AttachmentRepository attachmentRepository;
+    private final UserSearchDao userSearchDao;
+
 
     //phụ thuộc
     private final TeamMemberRepository teamMemberRepository;
     private final TokenRepository tokenRepository;
+
+    //tìm user
+    public List<UserSummaryDto> searchUserSummaries(SearchRequest request) {
+        List<User> users = userSearchDao.findAllByCriteria(request);
+        return users.stream()
+                .map(u -> UserSummaryDto.builder()
+                        .id(u.getId())
+                        .fullName(Stream.of(u.getFirstname(), u.getLastname())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.joining(" ")))
+                        .email(u.getEmail())
+                        .createdAt(u.getCreatedAt().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                        .role(u.getRole())  // Không .name(), vì DTO dùng kiểu enum
+                        .status(u.getStatus()) // Thêm dòng này để map status
+                        .build()
+                )
+                .toList();
+    }
 
     //danh sách người dùng
     public List<UserSummaryDto> getAllUsers() {
@@ -100,6 +128,7 @@ public class AdminService {
         List<TeamWorkspace> teams = teamWorkspaceRepository.findAll();
 
         return teams.stream().map(team -> {
+            // 👥 Lấy danh sách thành viên
             List<TeamMemberDTO> memberDTOs = team.getMembers().stream()
                     .map(tm -> TeamMemberDTO.builder()
                             .memberId(tm.getId())
@@ -111,20 +140,39 @@ public class AdminService {
                             .build()
                     ).toList();
 
+            // 📛 Tìm owner
+            Optional<TeamMember> ownerOpt = team.getMembers().stream()
+                    .filter(tm -> tm.getTeamRole() == TeamRole.OWNER)
+                    .findFirst();
+
+            String ownerFullName = ownerOpt.map(tm -> tm.getUser().getFullName()).orElse(null);
+            String ownerAvatarUrl = ownerOpt.map(tm -> tm.getUser().getAvatarUrl()).orElse(null);
+
+            // 📆 Format ngày tạo
+            String createdAt = team.getCreatedAt() != null
+                    ? team.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                    : null;
+
+            // 📦 Các thống kê
             int taskCount = (int) taskRepo.countByTeam(team);
-            int commentCount = (int) commentRepo.countByTeam(team); // ✅ dùng query đếm
+            int commentCount = (int) commentRepo.countByTeam(team);
             int fileCount = (int) attachmentRepository.countByTeamId(team.getId(), null);
 
-            return new TeamDto(
-                    team.getId(),
-                    team.getTeamName(),
-                    team.getDescription(),
-                    team.getCreatedBy() != null ? team.getCreatedBy().getFullName() : null,
-                    memberDTOs,
-                    taskCount,
-                    commentCount,
-                    fileCount
-            );
+            // 🧱 Build DTO
+            return TeamDto.builder()
+                    .teamId(team.getId())
+                    .teamName(team.getTeamName())
+                    .description(team.getDescription())
+                    .createdBy(team.getCreatedBy() != null ? team.getCreatedBy().getFullName() : null)
+                    .createdByAvatarUrl(team.getCreatedBy() != null ? team.getCreatedBy().getAvatarUrl() : null)
+                    .ownerFullName(ownerFullName)
+                    .ownerAvatarUrl(ownerAvatarUrl)
+                    .createdAt(createdAt)
+                    .members(memberDTOs)
+                    .totalFiles(fileCount)
+                    .totalComments(commentCount)
+                    .totalTasks(taskCount)
+                    .build();
         }).toList();
     }
 

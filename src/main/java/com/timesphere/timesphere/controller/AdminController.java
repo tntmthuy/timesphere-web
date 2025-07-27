@@ -1,5 +1,6 @@
 package com.timesphere.timesphere.controller;
 
+import com.timesphere.timesphere.dao.SearchRequest;
 import com.timesphere.timesphere.dto.admin.*;
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.plan.SubscriptionInfoDto;
@@ -27,6 +28,13 @@ public class AdminController {
 
     private final AdminService adminService;
     private final UpgradeService upgradeService;
+
+    //tìm user
+    @PostMapping("/users/search")
+    public ResponseEntity<ApiResponse<List<UserSummaryDto>>> searchUsers(@RequestBody SearchRequest request) {
+        List<UserSummaryDto> result = adminService.searchUserSummaries(request);
+        return ResponseEntity.ok(ApiResponse.success("Kết quả tìm kiếm", result));
+    }
 
     //lấy danh sách người dùng
     @GetMapping("/users")

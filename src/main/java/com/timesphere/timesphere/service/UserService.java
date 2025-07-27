@@ -27,16 +27,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class UserService {
 
-
-    private final UserSearchDao userSearchDao;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-
-    //cái này của admin
-    public List<User> searchUsers(SearchRequest request) {
-        return userSearchDao.findAllByCriteria(request);
-    }
 
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
