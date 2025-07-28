@@ -5,6 +5,7 @@ import com.timesphere.timesphere.entity.TaskComment;
 import com.timesphere.timesphere.entity.TeamWorkspace;
 import com.timesphere.timesphere.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,4 +24,7 @@ public interface TaskCommentRepository extends JpaRepository<TaskComment, String
     // lấy tất cả comment nhoóm
     @Query("SELECT COUNT(c) FROM TaskComment c WHERE c.task.column.team = :team")
     long countByTeam(@Param("team") TeamWorkspace team);
+
+    //admin xóa comment
+
 }

@@ -33,12 +33,21 @@ public class UpgradeService {
 
     public List<SubscriptionInfoDto> getAllSubscriptions() {
         return subscriptionRepository.findAll().stream()
-                .map(sub -> new SubscriptionInfoDto(
-                        sub.getPlanType(),
-                        sub.getStatus(),
-                        sub.getStartDate(),
-                        sub.getEndDate()
-                )).toList();
+                .map(sub -> {
+                    User u = sub.getUser();
+                    return new SubscriptionInfoDto(
+                            u.getId(),
+                            u.getFullName(),
+                            u.getEmail(),
+                            u.getAvatarUrl(),
+                            sub.getPlanType(),
+                            sub.getStatus(),
+                            sub.getStartDate(),
+                            sub.getEndDate(),
+                            sub.getPaymentId()
+                    );
+                })
+                .toList();
     }
 
     @Transactional
@@ -79,10 +88,16 @@ public class UpgradeService {
 
         return subscriptions.stream()
                 .map(sub -> new SubscriptionInfoDto(
+                        user.getId(),
+                        user.getFullName(),
+                        user.getEmail(),
+                        user.getAvatarUrl(),
                         sub.getPlanType(),
                         sub.getStatus(),
                         sub.getStartDate(),
-                        sub.getEndDate()
-                )).toList();
+                        sub.getEndDate(),
+                        sub.getPaymentId()
+                ))
+                .toList();
     }
 }

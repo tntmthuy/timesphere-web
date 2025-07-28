@@ -4,19 +4,13 @@ import com.timesphere.timesphere.dao.SearchRequest;
 import com.timesphere.timesphere.dto.admin.*;
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.plan.SubscriptionInfoDto;
-import com.timesphere.timesphere.entity.User;
 import com.timesphere.timesphere.service.AdminService;
 import com.timesphere.timesphere.service.UpgradeService;
-import com.timesphere.timesphere.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -53,7 +47,7 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật vai trò thành công"));
     }
 
-    //xoá
+    //xoá người dùng
     @DeleteMapping("/users/{id}")
     public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable String id) {
         adminService.deleteUserById(id);
@@ -66,6 +60,14 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllTeamsWithMembers());
     }
 
+    //xóa nhóm
+    @DeleteMapping("/teams/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteTeam(@PathVariable String id) {
+        adminService.deleteTeamById(id);
+        return ResponseEntity.ok(ApiResponse.success("Nhóm đã xoá thành công"));
+    }
+
+    //lọc cho nhóm
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<SummaryResponse>> getDashboardSummary() {
         SummaryResponse summary = adminService.getDashboardSummary();
@@ -88,7 +90,25 @@ public class AdminController {
     @GetMapping("/all-subscription")
     public ResponseEntity<ApiResponse<List<SubscriptionInfoDto>>> getAllSubscriptions() {
         List<SubscriptionInfoDto> result = upgradeService.getAllSubscriptions();
+
+        if (result.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.success("Không có giao dịch nào trên hệ thống", result));
+        }
+
         return ResponseEntity.ok(ApiResponse.success("Danh sách tất cả giao dịch", result));
+    }
+
+    //biểu đồ giao dịch
+    @GetMapping("/payments/chart")
+    public ResponseEntity<ApiResponse<List<PaymentChartPoint>>> getPaymentChart(
+            @RequestParam(required = false) String range,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
+    ) {
+        List<PaymentChartPoint> result = adminService.getPaymentStats(range, fromDate, toDate, month, year);
+        return ResponseEntity.ok(ApiResponse.success("Thống kê giao dịch theo thời gian", result));
     }
 }
 
