@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/kanban/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
                         .requestMatchers("/api/comment/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
                         .requestMatchers("/api/focus/**").hasAnyRole(FREE.name(), PREMIUM.name(), ADMIN.name())
+                        .requestMatchers("/api/openai/**").hasAnyRole(PREMIUM.name(), ADMIN.name())
                         .requestMatchers("/api").hasRole(ADMIN.name())
                         .requestMatchers("/", "/payment/**").permitAll()
                         .anyRequest().authenticated()

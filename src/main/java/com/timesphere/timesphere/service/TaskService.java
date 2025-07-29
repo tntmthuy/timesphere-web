@@ -3,6 +3,7 @@ package com.timesphere.timesphere.service;
 
 import com.timesphere.timesphere.dto.member.TeamMemberDTO;
 import com.timesphere.timesphere.dto.subtask.CreateSubtaskRequest;
+import com.timesphere.timesphere.dto.subtask.SubtaskDTO;
 import com.timesphere.timesphere.dto.task.AssignedTaskSummary;
 import com.timesphere.timesphere.dto.task.CreateTaskRequest;
 import com.timesphere.timesphere.dto.task.TaskResponseDTO;
@@ -288,6 +289,35 @@ public class TaskService {
                 .build();
 
         return taskRepo.save(sub);
+    }
+
+    //tạo nhiều subtask
+    @Transactional
+    public List<SubtaskDTO> createAndReturnSubtaskDtos(List<String> titles, String parentTaskId, User currentUser) {
+        Task parent = taskRepo.findById(parentTaskId)
+                .orElseThrow(() -> new AppException(ErrorCode.TASK_NOT_FOUND));
+
+        if (!canModifyTask(parent, currentUser)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        int currentPosition = taskRepo.findMaxSubtaskPositionByParentId(parentTaskId).orElse(-1) + 1;
+
+        List<Task> subtasks = new ArrayList<>();
+        for (String title : titles) {
+            Task subtask = Task.builder()
+                    .taskTitle(title)
+                    .isComplete(false)
+                    .subtaskPosition(currentPosition++)
+                    .parentTask(parent)
+                    .build();
+            subtasks.add(subtask);
+        }
+
+        List<Task> saved = taskRepo.saveAll(subtasks);
+        return saved.stream()
+                .map(TaskMapper::toSubtaskDto)
+                .toList();
     }
 
     // đánh dấu subtask

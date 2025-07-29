@@ -4,9 +4,7 @@ import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.dto.kanban.*;
 import com.timesphere.timesphere.dto.member.AssignTaskRequest;
 import com.timesphere.timesphere.dto.member.TeamMemberDTO;
-import com.timesphere.timesphere.dto.subtask.CreateSubtaskRequest;
-import com.timesphere.timesphere.dto.subtask.ReorderSubtaskRequest;
-import com.timesphere.timesphere.dto.subtask.UpdateSubtaskRequest;
+import com.timesphere.timesphere.dto.subtask.*;
 import com.timesphere.timesphere.dto.task.*;
 import com.timesphere.timesphere.entity.KanbanColumn;
 import com.timesphere.timesphere.entity.Task;
@@ -197,6 +195,17 @@ public class KanbanController {
     ) {
         Task sub = taskService.createSubtask(req, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Tạo subtask thành công!", TaskMapper.toSubtaskDto(sub)));
+    }
+
+    //tạo nhiều subtasks
+    @PostMapping("/task/subtask/bulk")
+    @PreAuthorize("hasAuthority('user:manage_board')")
+    public ResponseEntity<?> createMultipleSubtasks(
+            @RequestBody CreateMultipleSubtaskRequest req,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        List<SubtaskDTO> dtos = taskService.createAndReturnSubtaskDtos(req.getTitles(), req.getParentTaskId(), currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Tạo nhiều subtask thành công!", dtos));
     }
 
     // ✅ Đánh dấu trạng thái hoàn thành

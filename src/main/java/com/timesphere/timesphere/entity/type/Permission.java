@@ -22,7 +22,9 @@ public enum Permission {
 
     CALENDAR("premium:get_calendar"),
 
-    FOCUS("user:focus_sessions")
+    FOCUS("user:focus_sessions"),
+
+    AI_SUGGESTION("premium:ai_suggestion")
     ;
 
     private final String permission;

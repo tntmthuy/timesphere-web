@@ -33,7 +33,8 @@ public enum Role {
                     NOTIFICATION_USER,
                     PAYMENT,
                     CALENDAR,
-                    FOCUS
+                    FOCUS,
+                    AI_SUGGESTION
             )
     ),
     ADMIN(
@@ -43,9 +44,10 @@ public enum Role {
                     KANBAN_BOARD,
                     PROFILE_USER,
                     TASK_COMMENT,
-                    NOTIFICATION_USER, // chưa rõ có viết riêng không
+                    NOTIFICATION_USER,
                     PAYMENT,
-                    FOCUS
+                    FOCUS,
+                    AI_SUGGESTION
             )
     );
 
