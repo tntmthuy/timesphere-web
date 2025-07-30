@@ -13,7 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/focus")
@@ -60,6 +62,34 @@ public class FocusController {
         return ResponseEntity.ok(ApiResponse.success("Weekly focused minutes", totalMinutes));
     }
 
+    //lấy session trong tuần của tất cả
+    @GetMapping("/stats/week/all")
+    @PreAuthorize("hasAuthority('user:focus_sessions')")
+    public ResponseEntity<ApiResponse<List<UserFocusStats>>> getWeeklyStatsForAllUsers() {
+        List<UserFocusStats> stats = focusService.getWeeklyFocusStatsForAllUsers();
+        return ResponseEntity.ok(ApiResponse.success("Thống kê tuần của tất cả người dùng", stats));
+    }
+
+    //lấy session hôm nay và hôm qua
+    @GetMapping("/stats/day-comparison")
+    @PreAuthorize("hasAuthority('user:focus_sessions')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getTodayVsYesterdayStats(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        Map<String, Object> result = focusService.getDayComparison(currentUser);
+        return ResponseEntity.ok(ApiResponse.success("So sánh hôm nay vs hôm qua", result));
+    }
+
+    //lấy session của tuần này và tuấn trước
+    @GetMapping("/stats/week/comparison")
+    @PreAuthorize("hasAuthority('user:focus_sessions')")
+    public ResponseEntity<ApiResponse<Map<String, Map<String, Integer>>>> getWeeklyComparison(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        Map<String, Map<String, Integer>> result = focusService.getWeeklyComparison(currentUser);
+        return ResponseEntity.ok(ApiResponse.success("So sánh từng ngày giữa tuần này và tuần trước", result));
+    }
+
     // lấy toàn bộ phiên đã hoàn thành của 1 người
     @GetMapping("/completed")
     @PreAuthorize("hasAuthority('user:focus_sessions')")
@@ -81,7 +111,7 @@ public class FocusController {
         return ResponseEntity.ok(ApiResponse.success("Đã xóa phiên thành công"));
     }
 
-    //thời gian tất cả
+    // thời gian tất cả
     @GetMapping("/stats/all")
     @PreAuthorize("hasAuthority('user:focus_sessions')")
     public ResponseEntity<ApiResponse<List<UserFocusStats>>> getAllFocusStats() {

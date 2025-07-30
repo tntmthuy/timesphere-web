@@ -52,4 +52,12 @@ public interface FocusRepository extends JpaRepository<FocusSession, Long> {
     AND f.status = com.timesphere.timesphere.entity.FocusSession.Status.COMPLETED
 """)
     long countCompletedFocusByDate(@Param("date") LocalDate date);
+
+    //
+    List<FocusSession> findByUserAndStartedAtBetweenAndStatus(
+            User user,
+            LocalDateTime start,
+            LocalDateTime end,
+            FocusSession.Status status
+    );
 }

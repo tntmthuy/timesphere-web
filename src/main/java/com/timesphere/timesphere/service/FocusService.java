@@ -17,8 +17,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -108,6 +107,29 @@ public class FocusService {
         return focusMapper.toResponseList(sessions); // convert tại đây
     }
 
+    // lấy phiên tất cả người dùng
+    public List<UserFocusStats> getWeeklyFocusStatsForAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<UserFocusStats> results = new ArrayList<>();
+
+        LocalDate startDate = LocalDate.now().with(DayOfWeek.MONDAY);
+        LocalDateTime startOfWeek = startDate.atStartOfDay();
+        LocalDateTime endOfWeek = startDate.plusDays(6).atTime(LocalTime.MAX);
+
+        for (User user : users) {
+            if (user.getRole() == Role.ADMIN) continue;
+
+            List<FocusSession> weeklySessions = focusRepository.findByUserAndModeAndStatusAndStartedAtBetween(
+                    user, "focus", FocusSession.Status.COMPLETED, startOfWeek, endOfWeek);
+
+            int totalMinutes = weeklySessions.stream().mapToInt(FocusSession::getActualMinutes).sum();
+
+            results.add(new UserFocusStats(user.getFullName(), user.getAvatarUrl(), totalMinutes));
+        }
+
+        return results;
+    }
+
     //xóa phiên
     public void deleteSession(Long sessionId, User user) {
         FocusSession session = focusRepository.findById(sessionId)
@@ -141,5 +163,72 @@ public class FocusService {
         }
 
         return results;
+    }
+
+    //phiên của hôm này và hôm qua (biểu đồ tròn)
+    public Map<String, Object> getDayComparison(User user) {
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+
+        // Hôm nay
+        LocalDateTime startToday = today.atStartOfDay();
+        LocalDateTime endToday = today.atTime(LocalTime.MAX);
+
+        // Hôm qua
+        LocalDateTime startYesterday = yesterday.atStartOfDay();
+        LocalDateTime endYesterday = yesterday.atTime(LocalTime.MAX);
+
+        List<FocusSession> todaySessions = focusRepository.findByUserAndStartedAtBetweenAndStatus(
+                user, startToday, endToday, FocusSession.Status.COMPLETED
+        );
+
+        List<FocusSession> yesterdaySessions = focusRepository.findByUserAndStartedAtBetweenAndStatus(
+                user, startYesterday, endYesterday, FocusSession.Status.COMPLETED
+        );
+
+        int todayMinutes = todaySessions.stream().mapToInt(FocusSession::getActualMinutes).sum();
+        int yesterdayMinutes = yesterdaySessions.stream().mapToInt(FocusSession::getActualMinutes).sum();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("today", Map.of("count", todaySessions.size(), "minutes", todayMinutes));
+        response.put("yesterday", Map.of("count", yesterdaySessions.size(), "minutes", yesterdayMinutes));
+
+        return response;
+    }
+
+    //lấy phiên tuần naày và tuần truước
+    public Map<String, Map<String, Integer>> getWeeklyComparison(User user) {
+        Map<String, Integer> thisWeek = getFocusMinutesByDay(user, LocalDate.now());
+        Map<String, Integer> lastWeek = getFocusMinutesByDay(user, LocalDate.now().minusWeeks(1));
+
+        Map<String, Map<String, Integer>> response = new HashMap<>();
+        response.put("thisWeek", thisWeek);
+        response.put("lastWeek", lastWeek);
+
+        return response;
+    }
+    private Map<String, Integer> getFocusMinutesByDay(User user, LocalDate referenceDate) {
+        LocalDate startOfWeek = referenceDate.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = referenceDate.with(DayOfWeek.SUNDAY);
+
+        LocalDateTime from = startOfWeek.atStartOfDay();
+        LocalDateTime to = endOfWeek.atTime(LocalTime.MAX);
+
+        List<FocusSession> sessions = focusRepository.findByUserAndModeAndStatusAndStartedAtBetween(
+                user, "focus", FocusSession.Status.COMPLETED, from, to
+        );
+
+        Map<String, Integer> result = new LinkedHashMap<>();
+        for (DayOfWeek day : DayOfWeek.values()) {
+            String key = day.name().substring(0, 3).toLowerCase(); // mon, tue,...
+            result.put(key, 0);
+        }
+
+        for (FocusSession session : sessions) {
+            String key = session.getStartedAt().getDayOfWeek().name().substring(0, 3).toLowerCase();
+            result.put(key, result.get(key) + session.getActualMinutes());
+        }
+
+        return result;
     }
 }
