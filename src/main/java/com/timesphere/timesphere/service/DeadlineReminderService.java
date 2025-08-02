@@ -3,6 +3,7 @@ package com.timesphere.timesphere.service;
 import com.timesphere.timesphere.entity.Task;
 import com.timesphere.timesphere.entity.TeamMember;
 import com.timesphere.timesphere.entity.type.NotificationType;
+import com.timesphere.timesphere.repository.NotificationRepository;
 import com.timesphere.timesphere.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,38 +19,49 @@ import java.util.List;
 public class DeadlineReminderService {
 
     private final TaskRepository taskRepo;
+    private final NotificationRepository notificationRepo;
     private final NotificationService notificationService;
 
-    @Scheduled(cron = "0 0 1 * * *") // chạy mỗi ngày lúc 1h sáng
+    @Scheduled(cron = "0 0 1 * * *")
     public void remindTasksDueSoon() {
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime next3Days = now.plusDays(3);
 
-        List<Task> tasks = taskRepo.findAll(); // hoặc chỉ chọn những task còn active
+        List<Task> tasks = taskRepo.findByDateDueBetween(now.minusDays(1), next3Days);
 
         for (Task task : tasks) {
+            // ❌ Bỏ qua subtask
+            if (task.getParentTask() != null) continue;
+
             LocalDateTime deadline = task.getDateDue();
             long hoursUntilDue = Duration.between(now, deadline).toHours();
 
-            String dateLabel = null;
-            if (hoursUntilDue <= 24 && hoursUntilDue > 0) {
-                dateLabel = "in less than 24 hours";
-            } else if (hoursUntilDue <= 72 && hoursUntilDue > 24) {
-                dateLabel = "in 3 days";
-            } else if (deadline.isBefore(now)) {
-                dateLabel = "was due";
+            String label = null;
+            if (hoursUntilDue <= 0) {
+                label = "was due";
+            } else if (hoursUntilDue <= 24) {
+                label = "in less than 24 hours";
+            } else {
+                label = "in 3 days";
             }
 
-            if (dateLabel != null) {
+            if (label != null && task.getAssignees() != null) {
                 for (TeamMember member : task.getAssignees()) {
-                    notificationService.notify(
-                            member.getUser(),
-                            null,
-                            "Reminder: Task \"" + task.getTaskTitle() + "\" " + dateLabel,
-                            "Deadline: " + deadline.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                            "/mainpage/task/" + task.getId(),
+                    if (!notificationRepo.existsByTypeAndReferenceIdAndRecipientId(
                             NotificationType.DEADLINE_REMINDER,
-                            task.getId()
-                    );
+                            task.getId(),
+                            member.getUser().getId()
+                    )) {
+                        notificationService.notify(
+                                member.getUser(),
+                                null,
+                                "Task \"" + task.getTaskTitle() + "\" " + label,
+                                "Deadline: " + deadline.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                                "/mainpage/team/" + member.getTeam().getId(),
+                                NotificationType.DEADLINE_REMINDER,
+                                task.getId()
+                        );
+                    }
                 }
             }
         }

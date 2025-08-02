@@ -25,4 +25,5 @@ public class KanbanColumnMapper {
                 .tasks(taskDtos)
                 .build();
     }
+
 }

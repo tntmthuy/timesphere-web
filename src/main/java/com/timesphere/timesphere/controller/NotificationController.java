@@ -2,6 +2,7 @@ package com.timesphere.timesphere.controller;
 
 import com.timesphere.timesphere.dto.auth.ApiResponse;
 import com.timesphere.timesphere.entity.User;
+import com.timesphere.timesphere.service.DeadlineReminderService;
 import com.timesphere.timesphere.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final DeadlineReminderService deadlineReminderService;
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read_notification')")
@@ -65,5 +67,13 @@ public class NotificationController {
     ) {
         notificationService.markAsUnread(notificationId, user);
         return ResponseEntity.ok(ApiResponse.success("Đã đánh dấu chưa đọc."));
+    }
+
+    //kiểm tra thông báo từ hệ thống
+    @PostMapping("/test-remind-deadline")
+    @PreAuthorize("hasAuthority('user:read_notification')")
+    public ResponseEntity<?> testReminder(@AuthenticationPrincipal User user) {
+        deadlineReminderService.remindTasksDueSoon();
+        return ResponseEntity.ok(ApiResponse.success("Đã chạy logic nhắc deadline thủ công"));
     }
 }

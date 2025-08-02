@@ -61,5 +61,11 @@ public class TaskMapper {
                 .build();
     }
 
-
+    public static List<TaskResponseDTO> toDtoList(List<Task> tasks) {
+        return Optional.ofNullable(tasks)
+                .orElse(List.of())
+                .stream()
+                .map(TaskMapper::toDto)
+                .toList();
+    }
 }
