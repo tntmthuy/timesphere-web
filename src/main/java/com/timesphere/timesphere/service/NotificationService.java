@@ -56,6 +56,18 @@ public class NotificationService {
         notificationRepo.delete(noti);
     }
 
+    //xóa tất cả
+    @Transactional
+    public void deleteAllOfUser(User user) {
+        List<Notification> allNotis = notificationRepo.findByRecipient(user);
+        allNotis.forEach(noti -> {
+            if (noti.getType() == NotificationType.INVITE && noti.getReferenceId() != null) {
+                invitationRepository.deleteByTeamIdAndInvitedUserId(noti.getReferenceId(), user.getId());
+            }
+        });
+        notificationRepo.deleteAll(allNotis);
+    }
+
     //đánh dấu đã đọc 1 cái
     public void markAsRead(String notificationId, User user) {
         Notification noti = notificationRepo.findById(notificationId)

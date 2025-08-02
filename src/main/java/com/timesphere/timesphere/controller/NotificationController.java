@@ -37,6 +37,14 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success("Đã xoá thông báo."));
     }
 
+    //xóa tất cả
+    @DeleteMapping("/delete-all")
+    @PreAuthorize("hasAuthority('user:read_notification')")
+    public ResponseEntity<?> deleteAllNotifications(@AuthenticationPrincipal User user) {
+        notificationService.deleteAllOfUser(user);
+        return ResponseEntity.ok(ApiResponse.success("Đã xoá tất cả thông báo."));
+    }
+
     //đánh dấu từng thông báo
     @PostMapping("/{notificationId}/read")
     @PreAuthorize("hasAuthority('user:read_notification')")

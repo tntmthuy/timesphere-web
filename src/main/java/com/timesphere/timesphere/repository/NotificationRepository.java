@@ -22,6 +22,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.recipient.id = :userId AND n.isRead = false")
     void markAllAsRead(String userId);
 
+    // xóa tất cả
+    List<Notification> findByRecipient(User user);
+
     // hệ thống báo
     boolean existsByTypeAndReferenceIdAndRecipientId(NotificationType type, String referenceId, String recipientId);
 }
