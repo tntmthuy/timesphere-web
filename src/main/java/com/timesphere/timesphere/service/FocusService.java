@@ -124,7 +124,7 @@ public class FocusService {
 
             int totalMinutes = weeklySessions.stream().mapToInt(FocusSession::getActualMinutes).sum();
 
-            results.add(new UserFocusStats(user.getFullName(), user.getAvatarUrl(), totalMinutes));
+            results.add(new UserFocusStats(user.getId(), user.getFullName(), user.getAvatarUrl(), totalMinutes));
         }
 
         return results;
@@ -159,7 +159,7 @@ public class FocusService {
                     .mapToInt(FocusSession::getActualMinutes)
                     .sum();
 
-            results.add(new UserFocusStats(user.getFullName(), user.getAvatarUrl(), total));
+            results.add(new UserFocusStats(user.getId(), user.getFullName(), user.getAvatarUrl(), total));
         }
 
         return results;
