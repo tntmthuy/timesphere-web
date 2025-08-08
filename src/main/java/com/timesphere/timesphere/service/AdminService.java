@@ -35,6 +35,7 @@ public class AdminService {
     private final TeamRepository teamRepository;
     private final FocusRepository focusRepository;
     private final UserMapper userMapper;
+    private final TeamInvitationRepository teamInvitationRepository;
     private final TeamRepository teamWorkspaceRepository;
 
     private final TaskRepository taskRepo;
@@ -179,6 +180,7 @@ public class AdminService {
                 .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
 
         teamMemberRepository.deleteAllByTeam(team);
+        teamInvitationRepository.deleteAllByTeam(team);
         teamRepository.delete(team);
     }
 
